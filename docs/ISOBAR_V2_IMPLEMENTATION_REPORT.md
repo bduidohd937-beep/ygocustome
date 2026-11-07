@@ -13,13 +13,21 @@
 - 덱: `decks/isobar-v2.ydk` (메인 40 / 엑스트라 15)
 - 자동 검증: `python -m unittest discover -s tests`
 
+## V2.0.2 검증 결과
+
+`c210000212.lua`의 보고된 `<eof> expected near 'end'` 문법 오류를 수정했다. 불필요한 `end`를 제거하고 효과를 단계별 코드로 정리했다. 실제 Lua 파서인 `luaparser`로 `c210000201.lua`~`c210000216.lua` 및 `isobar.lua` 총 17개를 검사했으며 17개 모두 통과했다. 이 검사를 `tests/test_lua_syntax.py`로 자동화했다.
+
+수정된 16개 스크립트와 `isobar.lua`, `ygocustom.cdb`를 `C:\Users\bduid\Games\EDOPro\ProjectIgnis\expansions`에 반영했다. EDOPro 41.0.2 실행과 파일 로딩 확인은 시도했지만, UI 포커스 전환으로 실제 듀얼 재현까지는 완료하지 못했다.
+
+저장소·카드 DB·설치본에서 `아르카`/`Arca` 카드명, 카드 ID, 스크립트가 확인되지 않았다. 따라서 식별 정보가 없는 상태에서 카드 효과를 임의 변경하지 않았다. 해당 카드의 정확한 ID, 스크립트명 또는 원본 스크린샷이 제공되면 `aux.Stringid`와 DB 문자열을 대조할 수 있다.
+
 ## V2.0.1 핫픽스 검증 결과
 
 자동 검증은 9개 테스트 모두 통과했다. 카드 ID 연속성, 16장 메타데이터, 스크립트 경로, 속성·종족·종류, 덱 장수와 V2.0.1 핫픽스 가드를 검사한다.
 
 `python tools/build_cdb.py`도 성공했으며 27개 프로젝트 카드가 `ygocustom.cdb`에 생성됐다. 27개는 저장소 전체 카드 수이고 이소바르 V2는 그중 16장이다.
 
-이 환경에는 `lua`, `luac`, `EDOPro.exe`와 EDOPro 실행 엔진이 없어 Lua 바이트코드 검사와 실제 듀얼 재현은 실행하지 못했다. 따라서 이번 보고서는 정적·메타데이터·DB 빌드 검증 완료, Lua/EDOPro 엔진 검증 미실행으로 판정한다.
+이 환경에는 `lua`와 `luac`가 없었지만 `luaparser`를 설치해 실제 파싱 검사를 수행했다. EDOPro 실행 파일은 실행했으나 자동화 UI 포커스 문제로 실제 듀얼·콤보 재현은 미실행으로 판정한다.
 
 ## V2.0 → V2.0.1 변경
 
