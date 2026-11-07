@@ -480,9 +480,11 @@ def _decide_isobar(obs: dict, config: dict[str, float] | None = None) -> dict:
 try:
     from duelmind.core.universal import decide_unsupported
     from duelmind.profiles.registry import get_profile, profile_id_from_observation
+    from duelmind.profiles.oceantale import decide_ocean_tale
 except ImportError:  # Direct script execution keeps the V2.2 server compatible.
     from core.universal import decide_unsupported
     from profiles.registry import get_profile, profile_id_from_observation
+    from profiles.oceantale import decide_ocean_tale
 
 
 def decide(obs: dict, config: dict[str, float] | None = None) -> dict:
@@ -506,6 +508,8 @@ def decide(obs: dict, config: dict[str, float] | None = None) -> dict:
         result["profile_id"] = "isobar"
         result["profile_status"] = "supported"
         return result
+    if profile.profile_id == "ocean_tale":
+        return decide_ocean_tale(obs, config)
     return decide_unsupported(obs, profile)
 
 

@@ -23,21 +23,42 @@ class DuelmindV3ProfileTests(unittest.TestCase):
         self.assertEqual(result["profile_id"], "isobar")
         self.assertEqual(result["profile_status"], "supported")
 
-    def test_ocean_tale_is_registered_but_not_fabricated(self):
+    def test_ocean_tale_is_registered_and_supported(self):
         profile = get_profile("ocean_tale")
-        self.assertFalse(profile.implemented)
+        self.assertTrue(profile.implemented)
+        self.assertEqual(profile.strategy_version, "v4.1")
         result = engine.decide({
             "deck_profile": "ocean_tale",
             "legal_actions": [
-                action("activate", "activate", 990001),
+                action("activate", "activate", 210000310),
                 action("end", "end_phase"),
             ],
         })
-        self.assertEqual(result["action_id"], "end")
-        self.assertEqual(result["profile_status"], "unimplemented")
-        self.assertEqual(result["fallback_reason"], "unsupported_deck_profile")
-        self.assertTrue(result["required_inputs"])
-        self.assertEqual(result["candidates"][0]["score"], 0)
+        self.assertEqual(result["action_id"], "activate")
+        self.assertEqual(result["profile_status"], "supported")
+        self.assertEqual(result["strategy_goal"], "establish_battlefield")
+        self.assertFalse(result["fallback"])
+
+    def test_ocean_tale_raid_and_finisher_priorities(self):
+        raid = engine.decide({
+            "deck_profile": "ocean_tale",
+            "public_state": {"opponent_monster_count": 1, "opponent_leviathan_count": 1},
+            "legal_actions": [
+                action("arca", "special_summon", 210000306),
+                action("end", "end_phase"),
+            ],
+        })
+        self.assertEqual(raid["action_id"], "arca")
+        self.assertEqual(raid["strategy_goal"], "finish_leviathan_raid")
+        self.assertEqual(raid["chosen_path"][-1], "three_attacks")
+
+    def test_ocean_tale_profile_does_not_invent_actions(self):
+        result = engine.decide({
+            "deck_profile": "ocean_tale",
+            "legal_actions": [action("only", "end_phase", 210000304)],
+        })
+        self.assertEqual(result["action_id"], "only")
+        self.assertEqual(result["candidate_count"], 1)
 
     def test_unknown_profile_never_falls_back_to_isobar(self):
         result = engine.decide({

@@ -22,6 +22,8 @@ PROFILES: dict[str, DeckProfile] = {
 DECK_NAME_TO_PROFILE = {
     "DuelmindIsobar": "isobar",
     "AI_DuelmindIsobar": "isobar",
+    "DuelmindOceanTale": "ocean_tale",
+    "AI_DuelmindOceanTale": "ocean_tale",
     "OceanTale": "ocean_tale",
     "AI_OceanTale": "ocean_tale",
 }
