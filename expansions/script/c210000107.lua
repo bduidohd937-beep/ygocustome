@@ -37,6 +37,6 @@ end
 function s.ctfilter(c) return c:GetCounter(COUNTER)>0 end
 function s.protcon(e)
  local tp=e:GetHandlerPlayer()
- return Duel.GetMatchingGroupCount(s.ctfilter,tp,LOCATION_ONFIELD,0,nil)>=0 and Duel.GetCounter(tp,1,0,COUNTER)>=5
+ return Duel.GetCounter(tp,1,0,COUNTER)>=5
 end
 function s.prottg(e,c) return c:IsRace(RACE_THUNDER) end
