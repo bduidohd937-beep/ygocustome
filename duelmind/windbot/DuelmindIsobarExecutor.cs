@@ -113,7 +113,7 @@ namespace WindBot.Game.AI.Decks
 
         private bool HasWeatherStation()
         {
-            return Bot.HasInSpellZone(C.Observatory, true);
+            return Bot.HasInSpellZone(C.Observatory, true, true);
         }
 
         private bool EnemyHasCards()
@@ -157,73 +157,12 @@ namespace WindBot.Game.AI.Decks
 
         private int AskDuelmind(IList<ClientCard> cards, string kind)
         {
-            if (cards == null || cards.Count == 0 || cards.Count > 512)
+            if (cards == null || cards.Count == 0)
                 return -1;
-            var message = new StringBuilder(200 + cards.Count * 135);
-            message.Append("{\"protocol\":\"duelmind.v1\",\"public_state\":{");
-            message.Append("\"phase\":\"").Append(Duel.Phase.ToString().ToLowerInvariant()).Append("\",");
-            message.Append("\"going_first\":").Append(Duel.IsFirst ? "true" : "false").Append(",");
-            message.Append("\"own_monster_count\":").Append(Bot.GetMonsterCount()).Append(",");
-            message.Append("\"opponent_monster_count\":").Append(Enemy.GetMonsterCount()).Append(",");
-            message.Append("\"hand_count\":").Append(Bot.Hand.Count);
-            message.Append("},\"legal_actions\":[");
-            for (int i = 0; i < cards.Count; i++)
-            {
-                if (i != 0) message.Append(",");
-                var card = cards[i];
-                message.Append("{\"action_id\":\"").Append(i).Append("\",");
-                message.Append("\"kind\":\"").Append(kind).Append("\",");
-                message.Append("\"card_id\":").Append(card.Id).Append(",");
-                message.Append("\"target\":{\"high_value\":");
-                // Only use visible candidate metadata or own known cards;
-                // never disclose opponent hidden deck/hand information.
-                bool priority = card.Controller == 0 && IsPriorityOwnCard(card.Id);
-                message.Append(priority ? "true" : "false").Append("}}");
-            }
-            message.Append("]}");
-            try
-            {
-                using (var tcp = new TcpClient())
-                {
-                    var pending = tcp.BeginConnect("127.0.0.1", 28741, null, null);
-                    using (pending.AsyncWaitHandle)
-                    {
-                        if (!pending.AsyncWaitHandle.WaitOne(150))
-                            return -1;
-                    }
-                    tcp.EndConnect(pending);
-                    tcp.ReceiveTimeout = 200;
-                    tcp.SendTimeout = 200;
-                    using (var stream = tcp.GetStream())
-                    {
-                        byte[] request = Encoding.UTF8.GetBytes(message.ToString() + "\n");
-                        stream.Write(request, 0, request.Length);
-                        using (var reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true))
-                        {
-                            string response = reader.ReadLine();
-                            if (response == null || response.Length > 32768)
-                                return -1;
-                            using (var input = new MemoryStream(Encoding.UTF8.GetBytes(response)))
-                            {
-                                var serializer = new DataContractJsonSerializer(typeof(Decision));
-                                var selected = (Decision)serializer.ReadObject(input);
-                                int index;
-                                if (selected == null || selected.Error != null ||
-                                    !int.TryParse(selected.ActionId, out index) ||
-                                    index < 0 || index >= cards.Count)
-                                    return -1;
-                                return index;
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // The AI should remain playable even when the local
-                // Python server is closed or temporarily unavailable.
-                return -1;
-            }
+            var options = new List<DuelmindChoice>();
+            foreach (var c in cards)
+                options.Add(new DuelmindChoice { Card = c, Kind = kind });
+            return AskActionChoices(options);
         }
 
         public override IList<ClientCard> OnSelectCard(IList<ClientCard> cards, int min, int max, long hint, bool cancelable)
@@ -257,22 +196,62 @@ namespace WindBot.Game.AI.Decks
             Trace("python decision requested; choices=" + (choices == null ? 0 : choices.Count));
             if (choices == null || choices.Count == 0 || choices.Count > 512)
                 return -1;
-            var message = new StringBuilder(300 + choices.Count * 150);
+            var message = new StringBuilder(600 + choices.Count * 210);
             message.Append("{\"protocol\":\"duelmind.v1\",\"public_state\":{");
             message.Append("\"phase\":\"").Append(Duel.Phase.ToString().ToLowerInvariant()).Append("\",");
             message.Append("\"going_first\":").Append(Duel.IsFirst ? "true" : "false").Append(",");
             message.Append("\"own_monster_count\":").Append(Bot.GetMonsterCount()).Append(",");
             message.Append("\"opponent_monster_count\":").Append(Enemy.GetMonsterCount()).Append(",");
             message.Append("\"hand_count\":").Append(Bot.Hand.Count).Append(",");
-            message.Append("\"opponent_threat\":").Append(Enemy.GetMonsterCount() > 0 ? 1 : 0);
-            message.Append("},\"legal_actions\":[");
+            bool hasField = Bot.HasInSpellZone(C.Observatory, true, true);
+            message.Append("\"own_field_spell\":").Append(hasField ? "true" : "false").Append(",");
+            int lv4Count = 0;
+            foreach (var c in Bot.MonsterZone)
+                if (c != null && c.IsFaceup() && c.IsMonster() && c.Level == 4)
+                    lv4Count++;
+            message.Append("\"own_level4_count\":").Append(lv4Count).Append(",");
+            message.Append("\"chain_from_opponent\":");
+            if (Duel.CurrentChain.Count > 0)
+                message.Append(Duel.LastChainPlayer == 1 ? "true" : "false");
+            else
+                message.Append("null");
+            message.Append(",");
+            bool chainMonster = Duel.CurrentChain.Count > 0 &&
+                Duel.CurrentChain[Duel.CurrentChain.Count - 1] != null &&
+                Duel.CurrentChain[Duel.CurrentChain.Count - 1].IsMonster();
+            message.Append("\"chain_card_is_monster\":").Append(chainMonster ? "true" : "false").Append(",");
+            message.Append("\"opponent_threat\":").Append(
+                Duel.CurrentChain.Count > 0 && Duel.LastChainPlayer == 1
+                    ? 2 : (Enemy.GetMonsterCount() > 0 ? 1 : 0)).Append(",");
+            message.Append("\"hand_ids\":[");
+            for (int i = 0; i < Bot.Hand.Count; i++)
+            {
+                if (i > 0) message.Append(",");
+                message.Append(Bot.Hand[i].Id);
+            }
+            message.Append("],\"grave_ids\":[");
+            for (int i = 0; i < Bot.Graveyard.Count; i++)
+            {
+                if (i > 0) message.Append(",");
+                message.Append(Bot.Graveyard[i].Id);
+            }
+            message.Append("]},\"legal_actions\":[");
             for (int i = 0; i < choices.Count; i++)
             {
                 if (i > 0) message.Append(",");
                 var choice = choices[i];
+                var c = choice.Card;
                 message.Append("{\"action_id\":\"").Append(i).Append("\",");
                 message.Append("\"kind\":\"").Append(choice.Kind).Append("\",");
-                message.Append("\"card_id\":").Append(choice.Card == null ? 0 : choice.Card.Id).Append("}");
+                message.Append("\"card_id\":").Append(c == null || (c.Controller != 0 && !c.IsFaceup()) ? 0 : c.Id).Append(",");
+                message.Append("\"location\":\"").Append(c == null ? "" :
+                    c.Location.ToString().ToLowerInvariant()).Append("\",");
+                message.Append("\"controller\":").Append(c == null ? -1 : c.Controller).Append(",");
+                bool visible = c != null && (c.Controller == 0 || c.IsFaceup());
+                message.Append("\"target\":{\"is_faceup\":").Append(c != null && c.IsFaceup() ? "true" : "false").Append(",");
+                message.Append("\"high_value\":").Append(c != null &&
+                    c.Controller == 0 && IsPriorityOwnCard(c.Id) ? "true" : "false").Append(",");
+                message.Append("\"attack\":").Append(visible ? c.Attack : 0).Append("}}");
             }
             message.Append("]}");
             try
@@ -354,6 +333,18 @@ namespace WindBot.Game.AI.Decks
                 choices.Add(new DuelmindChoice {
                     Card = c, Kind = "set",
                     Action = new MainPhaseAction(MainPhaseAction.MainAction.SetSpell, c.ActionIndex)
+                });
+            // Give the decision engine a real opportunity to end the turn
+            // or enter battle instead of repeatedly setting/activating cards.
+            if (main.CanBattlePhase && Bot.HasAttackingMonster())
+                choices.Add(new DuelmindChoice {
+                    Card = null, Kind = "battle_phase",
+                    Action = new MainPhaseAction(MainPhaseAction.MainAction.ToBattlePhase)
+                });
+            if (main.CanEndPhase)
+                choices.Add(new DuelmindChoice {
+                    Card = null, Kind = "end_phase",
+                    Action = new MainPhaseAction(MainPhaseAction.MainAction.ToEndPhase)
                 });
             if (choices.Count == 0)
                 return null;
