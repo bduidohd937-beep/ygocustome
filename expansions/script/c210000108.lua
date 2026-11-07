@@ -24,6 +24,7 @@ function s.initial_effect(c)
  e3:SetRange(LOCATION_FZONE)
  e3:SetCountLimit(1,id)
  e3:SetTarget(s.reptg)
+ e3:SetValue(s.repval)
  e3:SetOperation(s.repop)
  c:RegisterEffect(e3)
 end
@@ -55,7 +56,7 @@ function s.ctop(e,tp,eg,ep,ev,re,r,rp)
  if tc and tc:IsFaceup() then tc:AddCounter(COUNTER,1) end
 end
 function s.repfilter(c,tp)
- return c:IsControler(tp) and c:IsLocation(LOCATION_MZONE) and c:IsRace(RACE_THUNDER) and (c:IsReason(REASON_EFFECT))
+ return c:IsControler(tp) and c:IsLocation(LOCATION_MZONE) and c:IsRace(RACE_THUNDER) and c:IsReason(REASON_EFFECT) and not c:IsReason(REASON_REPLACE)
 end
 function s.reptg(e,tp,eg,ep,ev,re,r,rp,chk)
  if chk==0 then return eg:IsExists(s.repfilter,1,nil,tp) and Duel.IsCanRemoveCounter(tp,1,0,COUNTER,3,REASON_EFFECT) end
@@ -65,6 +66,9 @@ function s.reptg(e,tp,eg,ep,ev,re,r,rp,chk)
  local sg=g:Select(tp,1,1,nil)
  e:SetLabelObject(sg:GetFirst())
  return true
+end
+function s.repval(e,c)
+ return c==e:GetLabelObject()
 end
 function s.repop(e,tp,eg,ep,ev,re,r,rp)
  Duel.RemoveCounter(tp,1,0,COUNTER,3,REASON_EFFECT)
