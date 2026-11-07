@@ -12,7 +12,8 @@ ISOBAR = {
     "sol": 210000204, "nova": 210000205, "zephyr": 210000206,
     "hawk": 210000207, "bastion": 210000208, "tempest": 210000209,
     "field": 210000210, "front": 210000211, "journal": 210000212,
-    "alert": 210000213,
+    "alert": 210000213, "cirrus": 210000214, "nimbus": 210000215,
+    "storm_boundary": 210000216,
 }
 KINDS = {
     "activate", "normal_summon", "special_summon", "xyz_summon",
@@ -102,6 +103,10 @@ def score(action: dict, obs: dict) -> tuple[int, list[str]]:
         bonus(33 if hand_count < 5 else 20, "후속 몬스터 확보")
     if cid in {ISOBAR["nova"], ISOBAR["rain"]} and kind == "special_summon":
         bonus(29 if own_monsters == 1 else 11, "랭크 4 전개 보조")
+    if cid == ISOBAR["cirrus"] and kind in {"normal_summon", "special_summon"}:
+        bonus(55 if not own_field else 38, "시러스로 중앙관측소 또는 이소바르 확보")
+    if cid == ISOBAR["nimbus"] and kind == "special_summon":
+        bonus(24 if own_field else -20, "기상 변경 후 님버스 확장")
     if cid == ISOBAR["zephyr"] and kind in {"normal_summon", "special_summon"}:
         bonus(23, "묘지 전개 기대")
     if kind in {"xyz_summon", "special_summon"} and cid == ISOBAR["bastion"]:
@@ -116,6 +121,8 @@ def score(action: dict, obs: dict) -> tuple[int, list[str]]:
         bonus(20 + enemy_threat * 14, "상대 몬스터 효과 무효")
     if kind in {"activate", "chain"} and cid == ISOBAR["tempest"] and opp_monsters:
         bonus(25, "상대 카드 바운스")
+    if kind in {"activate", "chain"} and cid == ISOBAR["storm_boundary"] and opp_monsters:
+        bonus(36, "폭풍경계로 상대 마법·함정 돌파")
     if kind == "attack":
         if target.get("winning_attack") is True:
             bonus(150, "확정 킬 공격")
@@ -165,6 +172,8 @@ def score(action: dict, obs: dict) -> tuple[int, list[str]]:
             bonus(78 if opp_monsters > 0 else -92, "템페스트 바운스 유효성")
         if cid == ISOBAR["bolt"]:
             bonus(-72, "불필요한 레벨 조정 보류")
+    if kind == "activate" and cid == ISOBAR["field"] and not own_field:
+        bonus(100, "패의 중앙관측소를 즉시 발동")
 
     if kind == "activate":
         if cid in {ISOBAR["alert"], 14087893, 10045474} and opp_monsters == 0:
@@ -177,6 +186,13 @@ def score(action: dict, obs: dict) -> tuple[int, list[str]]:
             bonus(26, "상대 턴 견제 카드 세트")
         if cid in {ISOBAR["field"], ISOBAR["journal"]}:
             bonus(-85, "중요한 전개 마법을 세트하지 않음")
+    if kind == "end_phase" and any(
+        c in hand_ids for c in (
+            ISOBAR["field"], ISOBAR["argen"], ISOBAR["journal"],
+            ISOBAR["cirrus"], ISOBAR["rain"], ISOBAR["nova"],
+        )
+    ) and not own_field:
+        bonus(-100, "합법적인 초동 카드가 남아 있어 턴 종료 억제")
 
     if kind == "battle_phase":
         bonus(28 if own_monsters else -65, "전개 후 전투 기회")

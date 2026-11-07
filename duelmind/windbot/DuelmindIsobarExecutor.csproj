@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AssemblyName>DuelmindIsobarExecutor</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="DuelmindIsobarExecutor.cs" />
+    <Reference Include="WindBot">
+      <HintPath>$(EDOPRO_ROOT)\WindBot\WindBot.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ExecutorBase">
+      <HintPath>$(EDOPRO_ROOT)\WindBot\ExecutorBase.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -117,6 +117,22 @@ class IsobarV15Tactics(unittest.TestCase):
         ])
         self.assertEqual(result["action_id"], "only")
 
+    def test_v2_cirrus_is_preferred_to_ending_without_field(self):
+        result = decision([
+            a("cirrus", "special_summon", 210000214, "hand"),
+            a("end", "end_phase"),
+        ], own_field_spell=False, own_monster_count=0,
+           hand_ids=[210000214], hand_count=1)
+        self.assertEqual(result["action_id"], "cirrus")
+
+    def test_v2_storm_boundary_is_used_for_backrow_threat(self):
+        result = decision([
+            a("boundary", "activate", 210000216, "hand"),
+            a("end", "end_phase"),
+        ], own_field_spell=True, own_monster_count=1,
+           opponent_monster_count=2, opponent_threat=1)
+        self.assertEqual(result["action_id"], "boundary")
+
 
 if __name__ == "__main__":
     unittest.main()

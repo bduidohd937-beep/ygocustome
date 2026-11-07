@@ -49,6 +49,9 @@ namespace WindBot.Game.AI.Decks
             public const int Front = 210000211;
             public const int Journal = 210000212;
             public const int Alert = 210000213;
+            public const int Cirrus = 210000214;
+            public const int Nimbus = 210000215;
+            public const int StormBoundary = 210000216;
 
             public const int AshBlossom = 14558127;
             public const int EffectVeiler = 97268402;
@@ -72,6 +75,7 @@ namespace WindBot.Game.AI.Decks
             AddExecutor(ExecutorType.Activate, C.EffectVeiler, DefaultEffectVeiler);
             AddExecutor(ExecutorType.Activate, C.BookOfMoon);
             AddExecutor(ExecutorType.Activate, C.Front, HasWeatherStation);
+            AddExecutor(ExecutorType.Activate, C.StormBoundary, EnemyHasCards);
 
             // Establish the weather station, then develop Rank 4 material.
             AddExecutor(ExecutorType.Activate, C.Observatory);
@@ -80,6 +84,10 @@ namespace WindBot.Game.AI.Decks
             AddExecutor(ExecutorType.Activate, C.Argen);
             AddExecutor(ExecutorType.SpSummon, C.Nova);
             AddExecutor(ExecutorType.SpSummon, C.Rain);
+            AddExecutor(ExecutorType.SpSummon, C.Cirrus);
+            AddExecutor(ExecutorType.SpSummon, C.Nimbus);
+            AddExecutor(ExecutorType.Activate, C.Cirrus);
+            AddExecutor(ExecutorType.Activate, C.Nimbus);
             AddExecutor(ExecutorType.Activate, C.Zephyr);
             AddExecutor(ExecutorType.SpSummon, C.Zephyr);
             AddExecutor(ExecutorType.Summon, C.Zephyr);
@@ -102,6 +110,7 @@ namespace WindBot.Game.AI.Decks
             AddExecutor(ExecutorType.Summon, C.Sol);
             AddExecutor(ExecutorType.Summon, C.Nova);
             AddExecutor(ExecutorType.Summon, C.Rain);
+            AddExecutor(ExecutorType.Summon, C.Cirrus);
             AddExecutor(ExecutorType.SpSummon, C.Argen);
             AddExecutor(ExecutorType.SpSummon, C.TornadoDragon);
             AddExecutor(ExecutorType.SpSummon, C.AbyssDweller);
@@ -152,7 +161,8 @@ namespace WindBot.Game.AI.Decks
         {
             return id == C.Argen || id == C.Observatory ||
                 id == C.Journal || id == C.Nova || id == C.Bastion ||
-                id == C.Hawk || id == C.Tempest;
+                id == C.Hawk || id == C.Tempest || id == C.Cirrus ||
+                id == C.Nimbus || id == C.StormBoundary;
         }
 
         private int AskDuelmind(IList<ClientCard> cards, string kind)
@@ -347,9 +357,45 @@ namespace WindBot.Game.AI.Decks
                     Action = new MainPhaseAction(MainPhaseAction.MainAction.ToEndPhase)
                 });
             if (choices.Count == 0)
+            {
+                Trace("main phase had no legal choices");
                 return null;
+            }
             int selected = AskActionChoices(choices);
-            return selected >= 0 ? choices[selected].Action : null;
+            if (selected >= 0 && selected < choices.Count)
+            {
+                Trace("main phase selected index=" + selected + " kind=" + choices[selected].Kind +
+                    " card=" + (choices[selected].Card == null ? 0 : choices[selected].Card.Id));
+                return choices[selected].Action;
+            }
+            Trace("main phase decision unavailable; using legal fallback");
+            return FallbackMainPhaseAction(choices);
+        }
+
+        private MainPhaseAction FallbackMainPhaseAction(IList<DuelmindChoice> choices)
+        {
+            foreach (var choice in choices)
+                if (choice.Card != null && choice.Card.Id == C.Observatory && choice.Kind == "activate")
+                    return choice.Action;
+            foreach (var choice in choices)
+                if (choice.Card != null && (choice.Card.Id == C.Argen || choice.Card.Id == C.Cirrus) &&
+                    (choice.Kind == "normal_summon" || choice.Kind == "special_summon"))
+                    return choice.Action;
+            foreach (var choice in choices)
+                if (choice.Card != null && (choice.Card.Id == C.Rain || choice.Card.Id == C.Nova ||
+                    choice.Card.Id == C.Zephyr || choice.Card.Id == C.Nimbus) &&
+                    (choice.Kind == "special_summon" || choice.Kind == "activate"))
+                    return choice.Action;
+            foreach (var choice in choices)
+                if (choice.Kind == "xyz_summon")
+                    return choice.Action;
+            foreach (var choice in choices)
+                if (choice.Kind == "battle_phase")
+                    return choice.Action;
+            foreach (var choice in choices)
+                if (choice.Kind == "end_phase")
+                    return choice.Action;
+            return choices[0].Action;
         }
 
         // EDOPro provided every chain card in this list. An optional 'pass'
