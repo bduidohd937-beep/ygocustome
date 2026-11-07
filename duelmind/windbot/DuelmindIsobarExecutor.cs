@@ -1,6 +1,13 @@
 // DUELMIND Isobar V1 — WindBot Ignite deck executor.
 // Copyright (c) custom archetype authors. Standalone source to integrate
 // into the AGPL-3.0-or-later WindBot Ignite project.
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Sockets;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using System.Text;
 using WindBot.Game;
 using WindBot.Game.AI;
 using YGOSharp.OCGWrapper.Enums;
@@ -110,5 +117,114 @@ namespace WindBot.Game.AI.Decks
         {
             return Enemy.GetMonsterCount() > 0;
         }
+        // Duelmind IPC bridge (optional): only selects among the exact
+        // legally offered choices. If the Python service is down, WindBot's
+        // original DefaultExecutor decision logic is used as a fallback.
+        [DataContract]
+        private sealed class Decision
+        {
+            [DataMember(Name = "action_id")]
+            public string ActionId { get; set; }
+
+            [DataMember(Name = "error")]
+            public string Error { get; set; }
+        }
+
+        private static bool IsPriorityOwnCard(int id)
+        {
+            return id == C.Argen || id == C.Observatory ||
+                id == C.Journal || id == C.Nova || id == C.Bastion ||
+                id == C.Hawk || id == C.Tempest;
+        }
+
+        private int AskDuelmind(IList<ClientCard> cards, string kind)
+        {
+            if (cards == null || cards.Count == 0 || cards.Count > 512)
+                return -1;
+            var message = new StringBuilder(200 + cards.Count * 135);
+            message.Append("{\"protocol\":\"duelmind.v1\",\"public_state\":{");
+            message.Append("\"phase\":\"").Append(Duel.Phase.ToString().ToLowerInvariant()).Append("\",");
+            message.Append("\"going_first\":").Append(Duel.IsFirst ? "true" : "false").Append(",");
+            message.Append("\"own_monster_count\":").Append(Bot.GetMonsterCount()).Append(",");
+            message.Append("\"opponent_monster_count\":").Append(Enemy.GetMonsterCount()).Append(",");
+            message.Append("\"hand_count\":").Append(Bot.Hand.Count);
+            message.Append("},\"legal_actions\":[");
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (i != 0) message.Append(",");
+                var card = cards[i];
+                message.Append("{\"action_id\":\"").Append(i).Append("\",");
+                message.Append("\"kind\":\"").Append(kind).Append("\",");
+                message.Append("\"card_id\":").Append(card.Id).Append(",");
+                message.Append("\"target\":{\"high_value\":");
+                // Only use visible candidate metadata or own known cards;
+                // never disclose opponent hidden deck/hand information.
+                bool priority = card.Controller == 0 && IsPriorityOwnCard(card.Id);
+                message.Append(priority ? "true" : "false").Append("}}");
+            }
+            message.Append("]}");
+            try
+            {
+                using (var tcp = new TcpClient())
+                {
+                    var pending = tcp.BeginConnect("127.0.0.1", 28741, null, null);
+                    using (pending.AsyncWaitHandle)
+                    {
+                        if (!pending.AsyncWaitHandle.WaitOne(150))
+                            return -1;
+                    }
+                    tcp.EndConnect(pending);
+                    tcp.ReceiveTimeout = 200;
+                    tcp.SendTimeout = 200;
+                    using (var stream = tcp.GetStream())
+                    {
+                        byte[] request = Encoding.UTF8.GetBytes(message.ToString() + "\n");
+                        stream.Write(request, 0, request.Length);
+                        using (var reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true))
+                        {
+                            string response = reader.ReadLine();
+                            if (response == null || response.Length > 32768)
+                                return -1;
+                            using (var input = new MemoryStream(Encoding.UTF8.GetBytes(response)))
+                            {
+                                var serializer = new DataContractJsonSerializer(typeof(Decision));
+                                var selected = (Decision)serializer.ReadObject(input);
+                                int index;
+                                if (selected == null || selected.Error != null ||
+                                    !int.TryParse(selected.ActionId, out index) ||
+                                    index < 0 || index >= cards.Count)
+                                    return -1;
+                                return index;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // The AI should remain playable even when the local
+                // Python server is closed or temporarily unavailable.
+                return -1;
+            }
+        }
+
+        public override IList<ClientCard> OnSelectCard(IList<ClientCard> cards, int min, int max, long hint, bool cancelable)
+        {
+            if (cards == null || cards.Count == 0 || min != 1 || max != 1)
+                return base.OnSelectCard(cards, min, max, hint, cancelable);
+            int index = AskDuelmind(cards, "select_card");
+            if (index < 0)
+                return base.OnSelectCard(cards, min, max, hint, cancelable);
+            return new List<ClientCard> { cards[index] };
+        }
+
+        public override ClientCard OnSelectAttacker(IList<ClientCard> attackers, IList<ClientCard> defenders)
+        {
+            if (attackers == null || attackers.Count == 0)
+                return base.OnSelectAttacker(attackers, defenders);
+            int index = AskDuelmind(attackers, "select_card");
+            return index >= 0 ? attackers[index] : base.OnSelectAttacker(attackers, defenders);
+        }
+
     }
 }
