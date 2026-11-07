@@ -6,6 +6,7 @@ on:
       - feat/duelmind-v1-windbot-executor
       - feat/duelmind-v1-ipc-bridge
       - feat/duelmind-v1-3-main-chain
+      - fix/duelmind-v1-4-db-runtime
   workflow_dispatch:
 
 jobs:
@@ -38,6 +39,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Could not register DUELMIND bot" }
           python duelmind/windbot/patch_gameai.py _windbot
           if ($LASTEXITCODE -ne 0) { throw "Could not patch WindBot GameAI" }
+          python duelmind/windbot/patch_windbot_db.py _windbot
+          if ($LASTEXITCODE -ne 0) { throw "Could not patch WindBot DB loader" }
 
       - name: Build custom EDOPro CDB
         shell: pwsh
