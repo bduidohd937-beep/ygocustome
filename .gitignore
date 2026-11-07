@@ -3,4 +3,5 @@ __pycache__/
 .DS_Store
 Thumbs.db
 *.ydk
+!decks/isobar-v2.ydk
 *.log
