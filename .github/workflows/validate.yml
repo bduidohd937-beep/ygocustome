@@ -10,6 +10,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Install Lua compiler
+        run: sudo apt-get update -qq && sudo apt-get install -y lua5.3
+      - name: Check Lua syntax
+        run: find expansions/script -name 'c*.lua' -print0 | xargs -0 -r luac -p
       - name: Run static checks
         run: python -m unittest discover -s tests
       - name: Build card database
