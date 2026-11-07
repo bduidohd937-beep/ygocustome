@@ -1,0 +1,67 @@
+name: DUELMIND WindBot Windows build
+
+on:
+  push:
+    branches:
+      - feat/duelmind-v1-windbot-executor
+  workflow_dispatch:
+
+jobs:
+  build-windbot:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout custom card project
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Clone WindBot Ignite source
+        shell: pwsh
+        run: git clone --depth 1 https://github.com/ProjectIgnis/windbot.git _windbot
+
+      - name: Patch Isobar executor and deck
+        shell: pwsh
+        run: |
+          Copy-Item "duelmind/windbot/DuelmindIsobarExecutor.cs" "_windbot/Game/AI/Decks/DuelmindIsobarExecutor.cs" -Force
+          Copy-Item "duelmind/windbot/AI_DuelmindIsobar.ydk" "_windbot/Decks/AI_DuelmindIsobar.ydk" -Force
+          python duelmind/windbot/register_bot.py _windbot/bots.json
+          if ($LASTEXITCODE -ne 0) { throw "Could not register DUELMIND bot" }
+
+      - name: Build custom EDOPro CDB
+        shell: pwsh
+        run: |
+          python tools/build_cdb.py
+          if ($LASTEXITCODE -ne 0) { throw "CDB build failed" }
+
+      - name: Compile WindBot NET8 Windows
+        shell: pwsh
+        run: |
+          dotnet publish "_windbot/net8/WindBot.csproj" -c Release -r win-x64 -p:PublishAot=false --self-contained true -o "$PWD/_package/WindBot"
+          if ($LASTEXITCODE -ne 0) { throw "WindBot compile failed" }
+
+      - name: Package bot files
+        shell: pwsh
+        run: |
+          Copy-Item "_windbot/bots.json" "_package/WindBot/bots.json" -Force
+          Copy-Item "_windbot/Decks" "_package/WindBot/Decks" -Recurse -Force
+          Copy-Item "_windbot/Dialogs" "_package/WindBot/Dialogs" -Recurse -Force
+          Copy-Item "expansions/ygocustom.cdb" "_package/WindBot/ygocustom.cdb" -Force
+          Copy-Item "_windbot/COPYING" "_package/WindBot/COPYING" -Force
+          Copy-Item "_windbot/LICENSE" "_package/WindBot/LICENSE" -Force
+          Copy-Item "duelmind/windbot/INSTALL.md" "_package/INSTALL.md" -Force
+
+      - name: Upload Windows bot
+        uses: actions/upload-artifact@v4
+        with:
+          name: DUELMIND-Isobar-WindBot-Windows
+          path: _package/
+          if-no-files-found: error
+          retention-days: 30
