@@ -17,6 +17,23 @@ namespace WindBot.Game.AI.Decks
     [Deck("DuelmindIsobar", "AI_DuelmindIsobar")]
     public class DuelmindIsobarExecutor : DefaultExecutor
     {
+        private static int _traceCount = 0;
+
+        private static void Trace(string detail)
+        {
+            try
+            {
+                if (System.Threading.Interlocked.Increment(ref _traceCount) > 300)
+                    return;
+                File.AppendAllText(
+                    Path.Combine(Path.GetTempPath(), "duelmind-windbot.log"),
+                    DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ") + " " + detail + Environment.NewLine);
+            }
+            catch (Exception)
+            {
+                // Logging must never interrupt a duel.
+            }
+        }
         private static class C
         {
             public const int Argen = 210000201;
@@ -43,6 +60,7 @@ namespace WindBot.Game.AI.Decks
 
         public DuelmindIsobarExecutor(GameAI ai, Duel duel) : base(ai, duel)
         {
+            Trace("DUELMIND executor activated; native C# bridge loaded");
             // WindBot filters against the duel engine's legally offered actions.
             // No card moves are fabricated outside the duel protocol.
 
@@ -236,6 +254,7 @@ namespace WindBot.Game.AI.Decks
 
         private int AskActionChoices(IList<DuelmindChoice> choices)
         {
+            Trace("python decision requested; choices=" + (choices == null ? 0 : choices.Count));
             if (choices == null || choices.Count == 0 || choices.Count > 512)
                 return -1;
             var message = new StringBuilder(300 + choices.Count * 150);
@@ -287,14 +306,16 @@ namespace WindBot.Game.AI.Decks
                                     !int.TryParse(selected.ActionId, out index) ||
                                     index < 0 || index >= choices.Count)
                                     return -1;
+                                Trace("python accepted selected index=" + index);
                                 return index;
                             }
                         }
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Trace("python connection failed: " + ex.GetType().Name + " " + ex.Message);
                 return -1;
             }
         }
@@ -303,6 +324,7 @@ namespace WindBot.Game.AI.Decks
         // Candidates are taken from MainPhase, populated by the EDOPro engine.
         public override MainPhaseAction TryDecideMainPhase(MainPhase main)
         {
+            Trace("main phase hook invoked");
             if (main == null)
                 return null;
             var choices = new List<DuelmindChoice>();
@@ -343,6 +365,7 @@ namespace WindBot.Game.AI.Decks
         // is represented as a choice, and never sent to the engine as a card.
         public override int TryDecideChain(IList<ClientCard> cards, bool forced)
         {
+            Trace("chain hook invoked; forced=" + forced);
             if (cards == null || cards.Count == 0)
                 return -2;
             var choices = new List<DuelmindChoice>();
