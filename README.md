@@ -15,6 +15,10 @@ EDOPro용 오리지널 유희왕 테마와 Lua 카드 스크립트 개발 저장
 
 현재 포함된 `210000001`은 개발 환경 검증용 **샘플 카드**입니다. 윤회기사 및 기타 실제 테마 카드 효과를 임의로 구현한 것이 아닙니다.
 
+## 오리지널 테마
+- [데스파이어 볼트 V2](docs/themes/deathfire-volt-v2.md) — 번·싱크로
+- [흑철기상청 — 이소바르 V1](docs/themes/isobar-v1.md) — 3기상·기계족·랭크4 엑시즈 (13장 / Lua 구현)
+
 ## 구조
 - `cards/cards.json`: 카드 메타데이터 원본
 - `expansions/script/`: EDOPro Lua 스크립트
