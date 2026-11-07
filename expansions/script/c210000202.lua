@@ -5,7 +5,7 @@ function s.initial_effect(c)
  local e2=Effect.CreateEffect(c); e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e2:SetProperty(EFFECT_FLAG_DELAY); e2:SetCode(EVENT_SUMMON_SUCCESS); e2:SetCountLimit(1,id+1000); e2:SetCondition(s.thcon); e2:SetTarget(s.thtg); e2:SetOperation(s.thop); c:RegisterEffect(e2); local e3=e2:Clone(); e3:SetCode(EVENT_SPSUMMON_SUCCESS); c:RegisterEffect(e3)
 end
 s.listed_series={ISOBAR.SET}
-function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk) local c=e:GetHandler(); if chk==0 then return ISOBAR.Field(tp) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and c:IsCanBeSpecialSummoned(e,0,tp,false,false) end end
+function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk) local c=e:GetHandler(); if chk==0 then return (ISOBAR.Field(tp)~=nil or Duel.IsExistingMatchingCard(ISOBAR.Monster,tp,LOCATION_MZONE,0,1,nil)) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and c:IsCanBeSpecialSummoned(e,0,tp,false,false) end end
 function s.spop(e,tp) Duel.SpecialSummon(e:GetHandler(),0,tp,tp,false,false,POS_FACEUP) end
 function s.thcon(e,tp) return ISOBAR.Is(tp,ISOBAR.RAIN) end
 function s.thfilter(c) return c:IsSetCard(ISOBAR.SET) and c:IsAbleToHand() end

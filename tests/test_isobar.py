@@ -59,6 +59,22 @@ class IsobarDatabaseTests(unittest.TestCase):
         self.assertEqual(len(main), 40)
         self.assertEqual(len(extra), 15)
 
+    def test_v201_hotfix_guards(self):
+        rain = (ROOT / "expansions" / "script" / "c210000202.lua").read_text(encoding="utf-8")
+        volt = (ROOT / "expansions" / "script" / "c210000203.lua").read_text(encoding="utf-8")
+        zero = (ROOT / "expansions" / "script" / "c210000209.lua").read_text(encoding="utf-8")
+        storm = (ROOT / "expansions" / "script" / "c210000216.lua").read_text(encoding="utf-8")
+        nimbus = (ROOT / "expansions" / "script" / "c210000215.lua").read_text(encoding="utf-8")
+        self.assertIn("ISOBAR.Field(tp)~=nil or Duel.IsExistingMatchingCard(ISOBAR.Monster", rain)
+        self.assertIn("PHASE_MAIN1 or Duel.GetCurrentPhase()==PHASE_MAIN2", volt)
+        self.assertEqual(zero.count("SetCountLimit(1,id+1000)"), 2)
+        self.assertIn("EFFECT_TYPE_ACTIVATE", storm)
+        self.assertIn("not ISOBAR.Is(tp,ISOBAR.STORM)", storm)
+        self.assertIn("EFFECT_FLAG_CARD_TARGET", storm)
+        self.assertIn("GetFlagEffect(id+3000)==0", storm)
+        self.assertIn("EVENT_BE_MATERIAL", nimbus)
+        self.assertIn("GetOverlayGroup():IsContains", nimbus)
+
 
 if __name__ == "__main__":
     unittest.main()
