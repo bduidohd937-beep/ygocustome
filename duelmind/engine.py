@@ -427,7 +427,7 @@ def score(action: dict, obs: dict, weights: dict[str, float] | None = None) -> t
     return value, reasons
 
 
-def decide(obs: dict, config: dict[str, float] | None = None) -> dict:
+def _decide_isobar(obs: dict, config: dict[str, float] | None = None) -> dict:
     actions = validate(obs)
     weights = config or load_strategy_config()
     ranked = sorted(
@@ -475,6 +475,38 @@ def decide(obs: dict, config: dict[str, float] | None = None) -> dict:
         "actual_result": "unobserved_before_execution",
         "plan_change_reason": "no_post_action_observation_received",
     }
+
+
+try:
+    from duelmind.core.universal import decide_unsupported
+    from duelmind.profiles.registry import get_profile, profile_id_from_observation
+except ImportError:  # Direct script execution keeps the V2.2 server compatible.
+    from core.universal import decide_unsupported
+    from profiles.registry import get_profile, profile_id_from_observation
+
+
+def decide(obs: dict, config: dict[str, float] | None = None) -> dict:
+    """Dispatch an observation to an explicit deck profile.
+
+    Requests from older V2.2 adapters omit ``deck_profile``.  They retain the
+    established Isobar behavior for compatibility.  New adapters must send an
+    explicit profile; unknown or unimplemented decks receive only the safe
+    generic fallback and are never inferred from card IDs.
+    """
+    profile_id = profile_id_from_observation(obs)
+    if profile_id is None:
+        result = _decide_isobar(obs, config)
+        result["profile_id"] = "isobar"
+        result["profile_status"] = "legacy_compatibility"
+        return result
+
+    profile = get_profile(profile_id)
+    if profile.profile_id == "isobar":
+        result = _decide_isobar(obs, config)
+        result["profile_id"] = "isobar"
+        result["profile_status"] = "supported"
+        return result
+    return decide_unsupported(obs, profile)
 
 
 def serve_stdio() -> None:

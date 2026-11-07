@@ -18,6 +18,8 @@ namespace WindBot.Game.AI.Decks
     [Deck("DuelmindIsobar", "AI_DuelmindIsobar")]
     public class DuelmindIsobarExecutor : DefaultExecutor
     {
+        private const string DeckName = "DuelmindIsobar";
+        private const string DeckProfile = "isobar";
         private static int _traceCount = 0;
 
         private static void Trace(string detail)
@@ -87,6 +89,8 @@ namespace WindBot.Game.AI.Decks
                 }
                 var record = new Dictionary<string, object> {
                     ["timestamp"] = DateTime.UtcNow.ToString("o"),
+                    ["deck_name"] = DeckName,
+                    ["deck_profile"] = DeckProfile,
                     ["turn"] = Duel.Turn,
                     ["phase"] = Duel.Phase.ToString(),
                     ["fallback"] = fallback,
@@ -390,7 +394,11 @@ namespace WindBot.Game.AI.Decks
                 return -1;
             }
             var message = new StringBuilder(600 + choices.Count * 210);
-            message.Append("{\"protocol\":\"duelmind.v1\",\"public_state\":{");
+            message.Append("{\"protocol\":\"duelmind.v1\",\"deck_name\":\"").Append(DeckName)
+                .Append("\",\"deck_profile\":\"").Append(DeckProfile)
+                .Append("\",\"public_state\":{");
+            message.Append("\"deck_name\":\"").Append(DeckName).Append("\",");
+            message.Append("\"deck_profile\":\"").Append(DeckProfile).Append("\",");
             message.Append("\"turn\":").Append(Duel.Turn).Append(",");
             message.Append("\"phase\":\"").Append(Duel.Phase.ToString().ToLowerInvariant()).Append("\",");
             message.Append("\"going_first\":").Append(Duel.IsFirst ? "true" : "false").Append(",");

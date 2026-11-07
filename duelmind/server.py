@@ -50,6 +50,8 @@ class Handler(socketserver.StreamRequestHandler):
             return
         state = observation.get("public_state") or {}
         record = {"timestamp": datetime.now(timezone.utc).isoformat(),
+                  "deck_name": observation.get("deck_name") or state.get("deck_name"),
+                  "deck_profile": result.get("profile_id") or observation.get("deck_profile") or state.get("deck_profile"),
                   "turn": state.get("turn"),
                   "phase": state.get("phase"),
                   "observation": observation, "decision": result,
