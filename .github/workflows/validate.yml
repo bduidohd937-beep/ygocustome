@@ -1,0 +1,32 @@
+name: EDOPro starter validation
+on:
+  push:
+  pull_request:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Lua compiler
+        run: sudo apt-get update -qq && sudo apt-get install -y lua5.3
+      - name: Check Lua syntax
+        run: find expansions/script -name 'c*.lua' -print0 | xargs -0 -r luac -p
+      - name: Run static checks
+        run: python -m unittest discover -s tests
+      - name: Build card database
+        run: python tools/build_cdb.py
+      - name: Validate database contents
+        run: |
+          python - <<'PY'
+          import sqlite3
+          with sqlite3.connect('expansions/ygocustom.cdb') as db:
+              assert db.execute('select count(*) from datas').fetchone()[0] > 0
+              assert db.execute('select count(*) from texts').fetchone()[0] > 0
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ygocustom-cdb
+          path: expansions/ygocustom.cdb
