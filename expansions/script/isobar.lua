@@ -46,3 +46,16 @@ end
 function ISOBAR.Xyz(c)
  return c:IsFaceup() and c:IsSetCard(ISOBAR.SET) and c:IsType(TYPE_XYZ)
 end
+function ISOBAR.MachineExtra(e,c)
+ return c:IsLocation(LOCATION_EXTRA) and not c:IsRace(RACE_MACHINE)
+end
+function ISOBAR.ApplyMachineLock(c,tp)
+ local e=Effect.CreateEffect(c)
+ e:SetType(EFFECT_TYPE_FIELD)
+ e:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+ e:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
+ e:SetTargetRange(1,0)
+ e:SetTarget(ISOBAR.MachineExtra)
+ e:SetReset(RESET_PHASE+PHASE_END)
+ Duel.RegisterEffect(e,tp)
+end

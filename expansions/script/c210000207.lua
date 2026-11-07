@@ -1,63 +1,15 @@
--- Isobar Xyz: 210000207
 Duel.LoadScript("isobar.lua")
 local s,id=GetID()
 function s.initial_effect(c)
- Xyz.AddProcedure(c,s.matfilter,4,2)
- c:EnableReviveLimit()
- local e1=Effect.CreateEffect(c)
- e1:SetDescription(aux.Stringid(id,0))
- e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
- e1:SetProperty(EFFECT_FLAG_DELAY)
- e1:SetCode(EVENT_SPSUMMON_SUCCESS)
- e1:SetCountLimit(1,id)
- e1:SetCondition(s.wxcon)
- e1:SetTarget(s.wxtg)
- e1:SetOperation(s.wxop)
- c:RegisterEffect(e1)
- local e2=Effect.CreateEffect(c)
- e2:SetDescription(aux.Stringid(id,1))
- e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
- e2:SetType(EFFECT_TYPE_IGNITION)
- e2:SetRange(LOCATION_MZONE)
- e2:SetCountLimit(1,id+1000)
- e2:SetCost(s.thcost)
- e2:SetTarget(s.thtg)
- e2:SetOperation(s.thop)
- c:RegisterEffect(e2)
+ Xyz.AddProcedure(c,function(tc) return tc:IsLevel(4) and tc:IsRace(RACE_MACHINE) end,4,2); c:EnableReviveLimit()
+ local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e1:SetProperty(EFFECT_FLAG_DELAY); e1:SetCode(EVENT_SPSUMMON_SUCCESS); e1:SetCountLimit(1,id); e1:SetCondition(function(e) return e:GetHandler():IsSummonType(SUMMON_TYPE_XYZ) and ISOBAR.Field(e:GetHandlerPlayer())~=nil end); e1:SetTarget(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return ISOBAR.State(tp)~=ISOBAR.SUN end end); e1:SetOperation(function(e,tp) ISOBAR.Change(tp,ISOBAR.SUN,e) end); c:RegisterEffect(e1)
+ local e2=Effect.CreateEffect(c); e2:SetType(EFFECT_TYPE_IGNITION); e2:SetRange(LOCATION_MZONE); e2:SetCountLimit(1,id+1000); e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH+CATEGORY_SPECIAL_SUMMON); e2:SetCost(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return e:GetHandler():CheckRemoveOverlayCard(tp,1,REASON_COST) end; e:GetHandler():RemoveOverlayCard(tp,1,1,REASON_COST) end); e2:SetTarget(s.thtg); e2:SetOperation(s.thop); c:RegisterEffect(e2)
+ local e3=Effect.CreateEffect(c); e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O); e3:SetProperty(EFFECT_FLAG_DELAY); e3:SetCode(ISOBAR.EVENT); e3:SetRange(LOCATION_MZONE); e3:SetCountLimit(1,id+2000); e3:SetCondition(function(e) return ISOBAR.Field(e:GetHandlerPlayer())~=nil end); e3:SetTarget(s.matg); e3:SetOperation(s.matop); c:RegisterEffect(e3)
 end
 s.listed_series={ISOBAR.SET}
-function s.matfilter(c) return c:IsRace(RACE_MACHINE) end
-function s.wxcon(e,tp,eg,ep,ev,re,r,rp)
- return e:GetHandler():IsSummonType(SUMMON_TYPE_XYZ) and ISOBAR.Field(tp)~=nil
-end
-function s.wxtg(e,tp,eg,ep,ev,re,r,rp,chk)
- if chk==0 then return ISOBAR.State(tp)~=ISOBAR.SUN end
-end
-function s.wxop(e,tp,eg,ep,ev,re,r,rp) ISOBAR.Change(tp,ISOBAR.SUN,e) end
-function s.thcost(e,tp,eg,ep,ev,re,r,rp,chk)
- if chk==0 then return e:GetHandler():CheckRemoveOverlayCard(tp,1,REASON_COST) end
- e:GetHandler():RemoveOverlayCard(tp,1,1,REASON_COST)
-end
-function s.thfilter(c)
- return c:IsMonster() and c:IsSetCard(ISOBAR.SET) and c:IsAbleToHand()
-end
-function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
- if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil) end
- Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
-end
-function s.limit(e,c)
- return c:IsLocation(LOCATION_EXTRA) and not c:IsRace(RACE_MACHINE)
-end
-function s.thop(e,tp,eg,ep,ev,re,r,rp)
- Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
- local g=Duel.SelectMatchingCard(tp,s.thfilter,tp,LOCATION_DECK,0,1,1,nil)
- if #g>0 then Duel.SendtoHand(g,nil,REASON_EFFECT) Duel.ConfirmCards(1-tp,g) end
- local e1=Effect.CreateEffect(e:GetHandler())
- e1:SetType(EFFECT_TYPE_FIELD)
- e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
- e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
- e1:SetTargetRange(1,0)
- e1:SetTarget(s.limit)
- e1:SetReset(RESET_PHASE+PHASE_END)
- Duel.RegisterEffect(e1,tp)
-end
+function s.thfilter(c) return c:IsSetCard(ISOBAR.SET) and c:IsMonster() and c:IsAbleToHand() end
+function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil) end end
+function s.thop(e,tp) local g=Duel.SelectMatchingCard(tp,s.thfilter,tp,LOCATION_DECK,0,1,1,nil); if #g==0 then return end; Duel.SendtoHand(g,nil,REASON_EFFECT); Duel.ConfirmCards(1-tp,g); local h=Duel.GetFieldGroup(tp,LOCATION_HAND,0):Filter(function(c) return c:IsSetCard(ISOBAR.SET) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) end,nil); if #h>0 and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then Duel.SpecialSummon(h:Select(tp,1,1,nil),0,tp,tp,false,false,POS_FACEUP) end; ISOBAR.ApplyMachineLock(e:GetHandler(),tp) end
+function s.matfilter(c) return c:IsSetCard(ISOBAR.SET) and c:IsMonster() and c:IsCanBeXyzMaterial(e:GetHandler(),REASON_EFFECT) end
+function s.matg(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return Duel.IsExistingMatchingCard(function(c) return c:IsSetCard(ISOBAR.SET) and c:IsMonster() and c:IsCanBeXyzMaterial(e:GetHandler(),REASON_EFFECT) end,tp,LOCATION_GRAVE,0,1,nil) end end
+function s.matop(e,tp) local g=Duel.SelectMatchingCard(tp,function(c) return c:IsSetCard(ISOBAR.SET) and c:IsMonster() and c:IsCanBeXyzMaterial(e:GetHandler(),REASON_EFFECT) end,tp,LOCATION_GRAVE,0,1,1,nil); if #g>0 then Duel.Overlay(e:GetHandler(),g) end end
