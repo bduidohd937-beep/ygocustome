@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feat/duelmind-v1-windbot-executor
+      - feat/duelmind-v1-ipc-bridge
   workflow_dispatch:
 
 jobs:
