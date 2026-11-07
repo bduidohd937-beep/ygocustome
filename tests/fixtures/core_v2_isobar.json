@@ -1,0 +1,1203 @@
+[
+  {
+    "observation": {
+      "public_state": {
+        "phase": "main1",
+        "going_first": true,
+        "own_monster_count": 0,
+        "opponent_monster_count": 0,
+        "hand_count": 5,
+        "own_field_spell": false,
+        "hand_ids": [
+          210000202,
+          210000213,
+          210000211,
+          210000213,
+          14558127
+        ],
+        "grave_ids": []
+      },
+      "legal_actions": [
+        {
+          "action_id": "0",
+          "kind": "normal_summon",
+          "card_id": 210000202,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 1400
+          }
+        },
+        {
+          "action_id": "1",
+          "kind": "normal_summon",
+          "card_id": 14558127,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "2",
+          "kind": "set",
+          "card_id": 210000213,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "3",
+          "kind": "set",
+          "card_id": 210000211,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "4",
+          "kind": "set",
+          "card_id": 210000213,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "5",
+          "kind": "end_phase",
+          "card_id": 0,
+          "location": "",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        }
+      ]
+    },
+    "expected": {
+      "action_id": "2",
+      "score": 39,
+      "ranked": [
+        {
+          "action_id": "2",
+          "score": 39
+        },
+        {
+          "action_id": "4",
+          "score": 39
+        },
+        {
+          "action_id": "0",
+          "score": 35
+        },
+        {
+          "action_id": "1",
+          "score": 35
+        },
+        {
+          "action_id": "3",
+          "score": 13
+        }
+      ]
+    }
+  },
+  {
+    "observation": {
+      "public_state": {
+        "phase": "main1",
+        "going_first": true,
+        "own_monster_count": 0,
+        "opponent_monster_count": 0,
+        "hand_count": 4,
+        "own_field_spell": false,
+        "hand_ids": [
+          210000202,
+          210000211,
+          210000213,
+          14558127
+        ],
+        "grave_ids": []
+      },
+      "legal_actions": [
+        {
+          "action_id": "0",
+          "kind": "normal_summon",
+          "card_id": 210000202,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 1400
+          }
+        },
+        {
+          "action_id": "1",
+          "kind": "normal_summon",
+          "card_id": 14558127,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "2",
+          "kind": "set",
+          "card_id": 210000211,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "3",
+          "kind": "set",
+          "card_id": 210000213,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "4",
+          "kind": "end_phase",
+          "card_id": 0,
+          "location": "",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        }
+      ]
+    },
+    "expected": {
+      "action_id": "3",
+      "score": 39,
+      "ranked": [
+        {
+          "action_id": "3",
+          "score": 39
+        },
+        {
+          "action_id": "0",
+          "score": 35
+        },
+        {
+          "action_id": "1",
+          "score": 35
+        },
+        {
+          "action_id": "2",
+          "score": 13
+        },
+        {
+          "action_id": "4",
+          "score": -168
+        }
+      ]
+    }
+  },
+  {
+    "observation": {
+      "public_state": {
+        "phase": "main1",
+        "going_first": true,
+        "own_monster_count": 0,
+        "opponent_monster_count": 0,
+        "hand_count": 3,
+        "own_field_spell": false,
+        "hand_ids": [
+          210000202,
+          210000211,
+          14558127
+        ],
+        "grave_ids": []
+      },
+      "legal_actions": [
+        {
+          "action_id": "0",
+          "kind": "normal_summon",
+          "card_id": 210000202,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 1400
+          }
+        },
+        {
+          "action_id": "1",
+          "kind": "normal_summon",
+          "card_id": 14558127,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "2",
+          "kind": "set",
+          "card_id": 210000211,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "3",
+          "kind": "end_phase",
+          "card_id": 0,
+          "location": "",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        }
+      ]
+    },
+    "expected": {
+      "action_id": "0",
+      "score": 35,
+      "ranked": [
+        {
+          "action_id": "0",
+          "score": 35
+        },
+        {
+          "action_id": "1",
+          "score": 35
+        },
+        {
+          "action_id": "2",
+          "score": 13
+        },
+        {
+          "action_id": "3",
+          "score": -168
+        }
+      ]
+    }
+  },
+  {
+    "observation": {
+      "public_state": {
+        "phase": "main1",
+        "going_first": true,
+        "own_monster_count": 1,
+        "opponent_monster_count": 0,
+        "hand_count": 2,
+        "own_field_spell": false,
+        "hand_ids": [
+          210000211,
+          14558127
+        ],
+        "grave_ids": []
+      },
+      "legal_actions": [
+        {
+          "action_id": "0",
+          "kind": "set",
+          "card_id": 210000211,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "1",
+          "kind": "end_phase",
+          "card_id": 0,
+          "location": "",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        }
+      ]
+    },
+    "expected": {
+      "action_id": "0",
+      "score": 13,
+      "ranked": [
+        {
+          "action_id": "0",
+          "score": 13
+        },
+        {
+          "action_id": "1",
+          "score": -45
+        }
+      ]
+    }
+  },
+  {
+    "observation": {
+      "public_state": {
+        "phase": "main1",
+        "going_first": true,
+        "own_monster_count": 0,
+        "opponent_monster_count": 0,
+        "hand_count": 5,
+        "own_field_spell": false,
+        "hand_ids": [
+          14558127,
+          10045474,
+          210000206,
+          210000210,
+          210000204
+        ],
+        "grave_ids": []
+      },
+      "legal_actions": [
+        {
+          "action_id": "0",
+          "kind": "activate",
+          "card_id": 210000210,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "1",
+          "kind": "normal_summon",
+          "card_id": 14558127,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "2",
+          "kind": "normal_summon",
+          "card_id": 210000206,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 1700
+          }
+        },
+        {
+          "action_id": "3",
+          "kind": "normal_summon",
+          "card_id": 210000204,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 1200
+          }
+        },
+        {
+          "action_id": "4",
+          "kind": "set",
+          "card_id": 10045474,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "5",
+          "kind": "set",
+          "card_id": 210000210,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "6",
+          "kind": "end_phase",
+          "card_id": 0,
+          "location": "",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        }
+      ]
+    },
+    "expected": {
+      "action_id": "0",
+      "score": 269,
+      "ranked": [
+        {
+          "action_id": "0",
+          "score": 269
+        },
+        {
+          "action_id": "2",
+          "score": 70
+        },
+        {
+          "action_id": "4",
+          "score": 39
+        },
+        {
+          "action_id": "1",
+          "score": 35
+        },
+        {
+          "action_id": "3",
+          "score": 35
+        }
+      ]
+    }
+  },
+  {
+    "observation": {
+      "public_state": {
+        "phase": "main1",
+        "going_first": true,
+        "own_monster_count": 0,
+        "opponent_monster_count": 0,
+        "hand_count": 4,
+        "own_field_spell": true,
+        "hand_ids": [
+          14558127,
+          10045474,
+          210000206,
+          210000204
+        ],
+        "grave_ids": []
+      },
+      "legal_actions": [
+        {
+          "action_id": "0",
+          "kind": "activate",
+          "card_id": 210000210,
+          "location": "spellzone",
+          "target": {
+            "is_faceup": true,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "1",
+          "kind": "normal_summon",
+          "card_id": 14558127,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "2",
+          "kind": "normal_summon",
+          "card_id": 210000206,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 1700
+          }
+        },
+        {
+          "action_id": "3",
+          "kind": "normal_summon",
+          "card_id": 210000204,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 1200
+          }
+        },
+        {
+          "action_id": "4",
+          "kind": "set",
+          "card_id": 10045474,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "5",
+          "kind": "end_phase",
+          "card_id": 0,
+          "location": "",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        }
+      ]
+    },
+    "expected": {
+      "action_id": "2",
+      "score": 70,
+      "ranked": [
+        {
+          "action_id": "2",
+          "score": 70
+        },
+        {
+          "action_id": "4",
+          "score": 39
+        },
+        {
+          "action_id": "1",
+          "score": 35
+        },
+        {
+          "action_id": "3",
+          "score": 35
+        },
+        {
+          "action_id": "0",
+          "score": 14
+        }
+      ]
+    }
+  },
+  {
+    "observation": {
+      "public_state": {
+        "phase": "main1",
+        "going_first": true,
+        "own_monster_count": 1,
+        "opponent_monster_count": 0,
+        "hand_count": 3,
+        "own_field_spell": true,
+        "hand_ids": [
+          14558127,
+          10045474,
+          210000204
+        ],
+        "grave_ids": []
+      },
+      "legal_actions": [
+        {
+          "action_id": "0",
+          "kind": "activate",
+          "card_id": 210000210,
+          "location": "spellzone",
+          "target": {
+            "is_faceup": true,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "1",
+          "kind": "set",
+          "card_id": 10045474,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "2",
+          "kind": "end_phase",
+          "card_id": 0,
+          "location": "",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        }
+      ]
+    },
+    "expected": {
+      "action_id": "1",
+      "score": 39,
+      "ranked": [
+        {
+          "action_id": "1",
+          "score": 39
+        },
+        {
+          "action_id": "0",
+          "score": 14
+        },
+        {
+          "action_id": "2",
+          "score": -45
+        }
+      ]
+    }
+  },
+  {
+    "observation": {
+      "public_state": {
+        "phase": "main1",
+        "going_first": true,
+        "own_monster_count": 1,
+        "opponent_monster_count": 0,
+        "hand_count": 2,
+        "own_field_spell": true,
+        "hand_ids": [
+          14558127,
+          210000204
+        ],
+        "grave_ids": []
+      },
+      "legal_actions": [
+        {
+          "action_id": "0",
+          "kind": "activate",
+          "card_id": 210000210,
+          "location": "spellzone",
+          "target": {
+            "is_faceup": true,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "1",
+          "kind": "end_phase",
+          "card_id": 0,
+          "location": "",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        }
+      ]
+    },
+    "expected": {
+      "action_id": "0",
+      "score": 14,
+      "ranked": [
+        {
+          "action_id": "0",
+          "score": 14
+        },
+        {
+          "action_id": "1",
+          "score": -45
+        }
+      ]
+    }
+  },
+  {
+    "observation": {
+      "public_state": {
+        "phase": "main1",
+        "going_first": true,
+        "own_monster_count": 1,
+        "opponent_monster_count": 0,
+        "hand_count": 2,
+        "own_field_spell": true,
+        "hand_ids": [
+          210000204,
+          210000212
+        ],
+        "grave_ids": [
+          14558127
+        ]
+      },
+      "legal_actions": [
+        {
+          "action_id": "0",
+          "kind": "activate",
+          "card_id": 210000210,
+          "location": "spellzone",
+          "target": {
+            "is_faceup": true,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "1",
+          "kind": "activate",
+          "card_id": 210000212,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "2",
+          "kind": "normal_summon",
+          "card_id": 210000204,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 1200
+          }
+        },
+        {
+          "action_id": "3",
+          "kind": "set",
+          "card_id": 210000212,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "4",
+          "kind": "battle_phase",
+          "card_id": 0,
+          "location": "",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "5",
+          "kind": "end_phase",
+          "card_id": 0,
+          "location": "",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        }
+      ]
+    },
+    "expected": {
+      "action_id": "1",
+      "score": 121,
+      "ranked": [
+        {
+          "action_id": "1",
+          "score": 121
+        },
+        {
+          "action_id": "4",
+          "score": 50
+        },
+        {
+          "action_id": "2",
+          "score": 35
+        },
+        {
+          "action_id": "0",
+          "score": 14
+        },
+        {
+          "action_id": "5",
+          "score": -45
+        }
+      ]
+    }
+  },
+  {
+    "observation": {
+      "public_state": {
+        "phase": "main1",
+        "going_first": true,
+        "own_monster_count": 1,
+        "opponent_monster_count": 0,
+        "hand_count": 1,
+        "own_field_spell": true,
+        "hand_ids": [
+          210000204
+        ],
+        "grave_ids": [
+          14558127
+        ]
+      },
+      "legal_actions": [
+        {
+          "action_id": "0",
+          "kind": "select_card",
+          "card_id": 210000206,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "1",
+          "kind": "select_card",
+          "card_id": 210000201,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "2",
+          "kind": "select_card",
+          "card_id": 210000205,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "3",
+          "kind": "select_card",
+          "card_id": 210000202,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "4",
+          "kind": "select_card",
+          "card_id": 210000203,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "5",
+          "kind": "select_card",
+          "card_id": 210000201,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "6",
+          "kind": "select_card",
+          "card_id": 210000205,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "7",
+          "kind": "select_card",
+          "card_id": 210000206,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "8",
+          "kind": "select_card",
+          "card_id": 210000202,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "9",
+          "kind": "select_card",
+          "card_id": 210000205,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "10",
+          "kind": "select_card",
+          "card_id": 210000204,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "11",
+          "kind": "select_card",
+          "card_id": 210000204,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "12",
+          "kind": "select_card",
+          "card_id": 210000203,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "13",
+          "kind": "select_card",
+          "card_id": 210000203,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "14",
+          "kind": "select_card",
+          "card_id": 210000201,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "15",
+          "kind": "select_card",
+          "card_id": 210000202,
+          "location": "deck",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        }
+      ]
+    },
+    "expected": {
+      "action_id": "1",
+      "score": 30,
+      "ranked": [
+        {
+          "action_id": "1",
+          "score": 30
+        },
+        {
+          "action_id": "2",
+          "score": 30
+        },
+        {
+          "action_id": "5",
+          "score": 30
+        },
+        {
+          "action_id": "6",
+          "score": 30
+        },
+        {
+          "action_id": "9",
+          "score": 30
+        }
+      ]
+    }
+  },
+  {
+    "observation": {
+      "public_state": {
+        "phase": "main1",
+        "going_first": true,
+        "own_monster_count": 1,
+        "opponent_monster_count": 0,
+        "hand_count": 2,
+        "own_field_spell": true,
+        "hand_ids": [
+          210000204,
+          210000205
+        ],
+        "grave_ids": [
+          14558127
+        ]
+      },
+      "legal_actions": [
+        {
+          "action_id": "0",
+          "kind": "select_card",
+          "card_id": 210000204,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 1200
+          }
+        },
+        {
+          "action_id": "1",
+          "kind": "select_card",
+          "card_id": 210000205,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": true,
+            "attack": 1000
+          }
+        }
+      ]
+    },
+    "expected": {
+      "action_id": "1",
+      "score": 30,
+      "ranked": [
+        {
+          "action_id": "1",
+          "score": 30
+        },
+        {
+          "action_id": "0",
+          "score": 0
+        }
+      ]
+    }
+  },
+  {
+    "observation": {
+      "public_state": {
+        "phase": "main1",
+        "going_first": true,
+        "own_monster_count": 1,
+        "opponent_monster_count": 0,
+        "hand_count": 1,
+        "own_field_spell": true,
+        "hand_ids": [
+          210000204
+        ],
+        "grave_ids": [
+          14558127,
+          210000205,
+          210000212
+        ]
+      },
+      "legal_actions": [
+        {
+          "action_id": "0",
+          "kind": "activate",
+          "card_id": 210000210,
+          "location": "spellzone",
+          "target": {
+            "is_faceup": true,
+            "high_value": true,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "1",
+          "kind": "normal_summon",
+          "card_id": 210000204,
+          "location": "hand",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 1200
+          }
+        },
+        {
+          "action_id": "2",
+          "kind": "battle_phase",
+          "card_id": 0,
+          "location": "",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        },
+        {
+          "action_id": "3",
+          "kind": "end_phase",
+          "card_id": 0,
+          "location": "",
+          "target": {
+            "is_faceup": false,
+            "high_value": false,
+            "attack": 0
+          }
+        }
+      ]
+    },
+    "expected": {
+      "action_id": "2",
+      "score": 50,
+      "ranked": [
+        {
+          "action_id": "2",
+          "score": 50
+        },
+        {
+          "action_id": "1",
+          "score": 35
+        },
+        {
+          "action_id": "0",
+          "score": 14
+        },
+        {
+          "action_id": "3",
+          "score": -45
+        }
+      ]
+    }
+  }
+]
