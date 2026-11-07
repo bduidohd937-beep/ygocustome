@@ -243,7 +243,7 @@ namespace WindBot.Game.AI.Decks
                 var c = choice.Card;
                 message.Append("{\"action_id\":\"").Append(i).Append("\",");
                 message.Append("\"kind\":\"").Append(choice.Kind).Append("\",");
-                message.Append("\"card_id\":").Append(c == null ? 0 : c.Id).Append(",");
+                message.Append("\"card_id\":").Append(c == null || (c.Controller != 0 && !c.IsFaceup()) ? 0 : c.Id).Append(",");
                 message.Append("\"location\":\"").Append(c == null ? "" :
                     c.Location.ToString().ToLowerInvariant()).Append("\",");
                 message.Append("\"controller\":").Append(c == null ? -1 : c.Controller).Append(",");
