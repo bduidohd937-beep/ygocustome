@@ -226,5 +226,135 @@ namespace WindBot.Game.AI.Decks
             return index >= 0 ? attackers[index] : base.OnSelectAttacker(attackers, defenders);
         }
 
+        private sealed class DuelmindChoice
+        {
+            public ClientCard Card;
+            public string Kind;
+            public MainPhaseAction Action;
+            public int ChainIndex;
+        }
+
+        private int AskActionChoices(IList<DuelmindChoice> choices)
+        {
+            if (choices == null || choices.Count == 0 || choices.Count > 512)
+                return -1;
+            var message = new StringBuilder(300 + choices.Count * 150);
+            message.Append("{\"protocol\":\"duelmind.v1\",\"public_state\":{");
+            message.Append("\"phase\":\"").Append(Duel.Phase.ToString().ToLowerInvariant()).Append("\",");
+            message.Append("\"going_first\":").Append(Duel.IsFirst ? "true" : "false").Append(",");
+            message.Append("\"own_monster_count\":").Append(Bot.GetMonsterCount()).Append(",");
+            message.Append("\"opponent_monster_count\":").Append(Enemy.GetMonsterCount()).Append(",");
+            message.Append("\"hand_count\":").Append(Bot.Hand.Count).Append(",");
+            message.Append("\"opponent_threat\":").Append(Enemy.GetMonsterCount() > 0 ? 1 : 0);
+            message.Append("},\"legal_actions\":[");
+            for (int i = 0; i < choices.Count; i++)
+            {
+                if (i > 0) message.Append(",");
+                var choice = choices[i];
+                message.Append("{\"action_id\":\"").Append(i).Append("\",");
+                message.Append("\"kind\":\"").Append(choice.Kind).Append("\",");
+                message.Append("\"card_id\":").Append(choice.Card == null ? 0 : choice.Card.Id).Append("}");
+            }
+            message.Append("]}");
+            try
+            {
+                using (var tcp = new TcpClient())
+                {
+                    var pending = tcp.BeginConnect("127.0.0.1", 28741, null, null);
+                    using (pending.AsyncWaitHandle)
+                    {
+                        if (!pending.AsyncWaitHandle.WaitOne(150))
+                            return -1;
+                    }
+                    tcp.EndConnect(pending);
+                    tcp.ReceiveTimeout = 200;
+                    tcp.SendTimeout = 200;
+                    using (var stream = tcp.GetStream())
+                    {
+                        byte[] request = Encoding.UTF8.GetBytes(message.ToString() + "\n");
+                        stream.Write(request, 0, request.Length);
+                        using (var reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true))
+                        {
+                            string response = reader.ReadLine();
+                            if (response == null || response.Length > 32768)
+                                return -1;
+                            using (var input = new MemoryStream(Encoding.UTF8.GetBytes(response)))
+                            {
+                                var serializer = new DataContractJsonSerializer(typeof(Decision));
+                                var selected = (Decision)serializer.ReadObject(input);
+                                int index;
+                                if (selected == null || selected.Error != null ||
+                                    !int.TryParse(selected.ActionId, out index) ||
+                                    index < 0 || index >= choices.Count)
+                                    return -1;
+                                return index;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return -1;
+            }
+        }
+
+        // Called only from our guarded WindBot GameAI patch.
+        // Candidates are taken from MainPhase, populated by the EDOPro engine.
+        public override MainPhaseAction TryDecideMainPhase(MainPhase main)
+        {
+            if (main == null)
+                return null;
+            var choices = new List<DuelmindChoice>();
+            for (int i = 0; i < main.ActivableCards.Count; i++)
+            {
+                var c = main.ActivableCards[i];
+                var desc = main.ActivableDescs[i];
+                int actionIndex;
+                if (c.ActionActivateIndex.TryGetValue(desc, out actionIndex))
+                    choices.Add(new DuelmindChoice {
+                        Card = c, Kind = "activate",
+                        Action = new MainPhaseAction(MainPhaseAction.MainAction.Activate, actionIndex)
+                    });
+            }
+            foreach (var c in main.SpecialSummonableCards)
+                choices.Add(new DuelmindChoice {
+                    Card = c,
+                    Kind = c.Location == CardLocation.Extra ? "xyz_summon" : "special_summon",
+                    Action = new MainPhaseAction(MainPhaseAction.MainAction.SpSummon, c.ActionIndex)
+                });
+            foreach (var c in main.SummonableCards)
+                choices.Add(new DuelmindChoice {
+                    Card = c, Kind = "normal_summon",
+                    Action = new MainPhaseAction(MainPhaseAction.MainAction.Summon, c.ActionIndex)
+                });
+            foreach (var c in main.SpellSetableCards)
+                choices.Add(new DuelmindChoice {
+                    Card = c, Kind = "set",
+                    Action = new MainPhaseAction(MainPhaseAction.MainAction.SetSpell, c.ActionIndex)
+                });
+            if (choices.Count == 0)
+                return null;
+            int selected = AskActionChoices(choices);
+            return selected >= 0 ? choices[selected].Action : null;
+        }
+
+        // EDOPro provided every chain card in this list. An optional 'pass'
+        // is represented as a choice, and never sent to the engine as a card.
+        public override int TryDecideChain(IList<ClientCard> cards, bool forced)
+        {
+            if (cards == null || cards.Count == 0)
+                return -2;
+            var choices = new List<DuelmindChoice>();
+            for (int i = 0; i < cards.Count; i++)
+                choices.Add(new DuelmindChoice {
+                    Card = cards[i], Kind = "chain", ChainIndex = i
+                });
+            if (!forced)
+                choices.Add(new DuelmindChoice { Card = null, Kind = "pass", ChainIndex = -1 });
+            int index = AskActionChoices(choices);
+            return index >= 0 ? choices[index].ChainIndex : -2;
+        }
+
     }
 }
