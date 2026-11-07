@@ -39,7 +39,8 @@ class DuelmindV21DecisionTests(unittest.TestCase):
                 "hand_count": 2,
             },
             "legal_actions": [
-                action("station", "activate", 210000210, "hand"),
+                action("station", "activate", 210000210, "hand") |
+                {"effect_profile": "observatory_effect_1_weather_change"},
                 action("argen", "normal_summon", 210000201, "hand"),
                 action("end", "end_phase"),
             ],
@@ -50,6 +51,30 @@ class DuelmindV21DecisionTests(unittest.TestCase):
                          ["station", "argen", "end"])
         self.assertEqual(result["candidates"][0]["card_name"], "흑철기상청 - 중앙관측소")
         self.assertTrue(result["candidates"][0]["reasons"])
+        self.assertEqual(result["strategy_goal"], "establish_observatory")
+        self.assertEqual(result["chosen_path"][0], "activate_observatory")
+        self.assertEqual(result["actual_result"], "unobserved_before_execution")
+
+    def test_effect_identifier_drives_verified_path(self):
+        result = engine.decide({
+            "public_state": {"opponent_monster_count": 1},
+            "legal_actions": [action(
+                "bounce", "activate", 210000209, "monsterzone",
+            ) | {"effect_profile": "tempest_effect_2_target_bounce"}],
+        })
+        self.assertEqual(result["chosen_path"], [
+            "target_opponent_field_card", "remove_one_material_to_bounce"
+        ])
+        self.assertEqual(result["expected_resource_change"]["overlay"], "-1 if cost paid")
+
+    def test_same_card_effect_descriptions_remain_distinct(self):
+        first = engine.effect_identifier({
+            "effect_profile": "bolt_effect_description:101",
+        })
+        second = engine.effect_identifier({
+            "effect_profile": "bolt_effect_description:102",
+        })
+        self.assertNotEqual(first, second)
 
     def test_verified_strategy_weights_can_change_a_tie(self):
         obs = {

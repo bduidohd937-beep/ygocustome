@@ -77,6 +77,9 @@ namespace WindBot.Game.AI.Decks
                             ["kind"] = choices[i].Kind,
                             ["card_id"] = id,
                             ["card_name"] = CardName(id),
+                            ["effect_description"] = choices[i].EffectDescription,
+                            ["activation_index"] = choices[i].ActivationIndex,
+                            ["effect_profile"] = choices[i].EffectProfile,
                             ["selected"] = i == selected,
                             ["score"] = null,
                         });
@@ -237,7 +240,10 @@ namespace WindBot.Game.AI.Decks
                 return -1;
             var options = new List<DuelmindChoice>();
             foreach (var c in cards)
-                options.Add(new DuelmindChoice { Card = c, Kind = kind });
+                options.Add(new DuelmindChoice {
+                    Card = c, Kind = kind,
+                    EffectProfile = kind + "_effect_identifier_unavailable"
+                });
             return AskActionChoices(options);
         }
 
@@ -265,6 +271,58 @@ namespace WindBot.Game.AI.Decks
             public string Kind;
             public MainPhaseAction Action;
             public int ChainIndex;
+            public long EffectDescription = -1;
+            public int ActivationIndex = -1;
+            public string EffectProfile = "not_applicable";
+        }
+
+        private static string EffectProfile(ClientCard card, string kind, long description)
+        {
+            if (card == null)
+                return "phase_action";
+            string location = card.Location.ToString().ToLowerInvariant();
+            switch (card.Id)
+            {
+                case C.Argen when kind == "activate" && location == "hand":
+                    return "argen_effect_2_weather_special_summon";
+                case C.Argen when kind == "activate":
+                    return "argen_effect_1_on_summon_search";
+                case C.Rain when kind == "activate" && location == "hand":
+                    return "rain_effect_1_field_special_summon";
+                case C.Rain when kind == "activate":
+                    return "rain_effect_2_rain_graveyard_recovery";
+                case C.Bolt when kind == "activate":
+                    return "bolt_effect_description:" + description;
+                case C.Sol when kind == "activate":
+                    return "sol_effect_1_sunny_send_to_grave";
+                case C.Nova when kind == "activate" && location == "hand":
+                    return "nova_effect_1_ally_special_summon";
+                case C.Zephyr when kind == "activate":
+                    return "zephyr_effect_description:" + description;
+                case C.Hawk when kind == "activate":
+                    return "hawk_effect_description:" + description;
+                case C.Bastion when kind == "activate":
+                    return "bastion_effect_2_rain_monster_negate";
+                case C.Tempest when kind == "activate":
+                    return "tempest_effect_2_target_bounce";
+                case C.Observatory when kind == "activate":
+                    return "observatory_effect_1_weather_change";
+                case C.Front when kind == "activate":
+                    return "front_effect_1_weather_change_and_boost";
+                case C.Journal when kind == "activate":
+                    return "journal_effect_1_search_and_optional_send";
+                case C.Alert when kind == "activate":
+                    return "alert_effect_1_target_negate";
+                case C.Cirrus when kind == "activate":
+                    return "cirrus_effect_2_search";
+                case C.Nimbus when kind == "activate":
+                    return "nimbus_effect_1_weather_event_special_summon";
+                case C.StormBoundary when kind == "activate":
+                    return location == "grave" ? "storm_boundary_effect_2_recycle_and_draw" :
+                        "storm_boundary_effect_1_storm_bounce";
+                default:
+                    return kind + "_description_" + description;
+            }
         }
 
         private static Dictionary<string, int> VerifiedEvaluation(DuelmindChoice choice)
@@ -386,6 +444,9 @@ namespace WindBot.Game.AI.Decks
                 message.Append("\"card_id\":").Append(c == null || (c.Controller != 0 && !c.IsFaceup()) ? 0 : c.Id).Append(",");
                 int visibleId = c == null || (c.Controller != 0 && !c.IsFaceup()) ? 0 : c.Id;
                 message.Append("\"card_name\":").Append(JsonSerializer.Serialize(CardName(visibleId))).Append(",");
+                message.Append("\"effect_description\":").Append(choice.EffectDescription).Append(",");
+                message.Append("\"activation_index\":").Append(choice.ActivationIndex).Append(",");
+                message.Append("\"effect_profile\":").Append(JsonSerializer.Serialize(choice.EffectProfile)).Append(",");
                 message.Append("\"location\":\"").Append(c == null ? "" :
                     c.Location.ToString().ToLowerInvariant()).Append("\",");
                 message.Append("\"controller\":").Append(c == null ? -1 : c.Controller).Append(",");
@@ -471,36 +532,47 @@ namespace WindBot.Game.AI.Decks
                 if (c.ActionActivateIndex.TryGetValue(desc, out actionIndex))
                     choices.Add(new DuelmindChoice {
                         Card = c, Kind = "activate",
-                        Action = new MainPhaseAction(MainPhaseAction.MainAction.Activate, actionIndex)
+                        Action = new MainPhaseAction(MainPhaseAction.MainAction.Activate, actionIndex),
+                        EffectDescription = desc,
+                        ActivationIndex = actionIndex,
+                        EffectProfile = EffectProfile(c, "activate", desc)
                     });
             }
             foreach (var c in main.SpecialSummonableCards)
                 choices.Add(new DuelmindChoice {
                     Card = c,
                     Kind = c.Location == CardLocation.Extra ? "xyz_summon" : "special_summon",
-                    Action = new MainPhaseAction(MainPhaseAction.MainAction.SpSummon, c.ActionIndex)
+                    Action = new MainPhaseAction(MainPhaseAction.MainAction.SpSummon, c.ActionIndex),
+                    ActivationIndex = c.ActionIndex[1],
+                    EffectProfile = EffectProfile(c, "special_summon", -1)
                 });
             foreach (var c in main.SummonableCards)
                 choices.Add(new DuelmindChoice {
                     Card = c, Kind = "normal_summon",
-                    Action = new MainPhaseAction(MainPhaseAction.MainAction.Summon, c.ActionIndex)
+                    Action = new MainPhaseAction(MainPhaseAction.MainAction.Summon, c.ActionIndex),
+                    ActivationIndex = c.ActionIndex[0],
+                    EffectProfile = EffectProfile(c, "normal_summon", -1)
                 });
             foreach (var c in main.SpellSetableCards)
                 choices.Add(new DuelmindChoice {
                     Card = c, Kind = "set",
-                    Action = new MainPhaseAction(MainPhaseAction.MainAction.SetSpell, c.ActionIndex)
+                    Action = new MainPhaseAction(MainPhaseAction.MainAction.SetSpell, c.ActionIndex),
+                    ActivationIndex = c.ActionIndex[4],
+                    EffectProfile = EffectProfile(c, "set", -1)
                 });
             // Give the decision engine a real opportunity to end the turn
             // or enter battle instead of repeatedly setting/activating cards.
             if (main.CanBattlePhase && Bot.HasAttackingMonster())
                 choices.Add(new DuelmindChoice {
                     Card = null, Kind = "battle_phase",
-                    Action = new MainPhaseAction(MainPhaseAction.MainAction.ToBattlePhase)
+                    Action = new MainPhaseAction(MainPhaseAction.MainAction.ToBattlePhase),
+                    EffectProfile = "phase_battle"
                 });
             if (main.CanEndPhase)
                 choices.Add(new DuelmindChoice {
                     Card = null, Kind = "end_phase",
-                    Action = new MainPhaseAction(MainPhaseAction.MainAction.ToEndPhase)
+                    Action = new MainPhaseAction(MainPhaseAction.MainAction.ToEndPhase),
+                    EffectProfile = "phase_end"
                 });
             if (choices.Count == 0)
             {
@@ -563,10 +635,14 @@ namespace WindBot.Game.AI.Decks
             var choices = new List<DuelmindChoice>();
             for (int i = 0; i < cards.Count; i++)
                 choices.Add(new DuelmindChoice {
-                    Card = cards[i], Kind = "chain", ChainIndex = i
+                    Card = cards[i], Kind = "chain", ChainIndex = i,
+                    EffectProfile = "chain_effect_identifier_unavailable"
                 });
             if (!forced)
-                choices.Add(new DuelmindChoice { Card = null, Kind = "pass", ChainIndex = -1 });
+                choices.Add(new DuelmindChoice {
+                    Card = null, Kind = "pass", ChainIndex = -1,
+                    EffectProfile = "chain_pass"
+                });
             int index = AskActionChoices(choices);
             return index >= 0 ? choices[index].ChainIndex : -2;
         }

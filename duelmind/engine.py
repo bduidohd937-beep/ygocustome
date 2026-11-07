@@ -100,6 +100,97 @@ def card_name(card_id: Any) -> str:
     return CARD_NAMES.get(_integer(card_id), "알 수 없는 카드")
 
 
+def effect_identifier(action: dict) -> str:
+    profile = action.get("effect_profile")
+    if isinstance(profile, str) and profile:
+        return profile
+    description = action.get("effect_description")
+    activation_index = action.get("activation_index")
+    if isinstance(description, int) and description >= 0:
+        return f"description:{description}:activation:{activation_index}"
+    return "effect_identifier_unavailable"
+
+
+def determine_strategy_goal(obs: dict, actions: list[dict]) -> str:
+    state = obs.get("public_state") or {}
+    if not isinstance(state, dict):
+        state = {}
+    own_field = state.get("own_field_spell") is True
+    opponent_monsters = _integer(state.get("opponent_monster_count"))
+    action_ids = {_integer(item.get("card_id")) for item in actions}
+    if not own_field and ISOBAR["field"] in action_ids:
+        return "establish_observatory"
+    if opponent_monsters > 0 and action_ids & {
+        ISOBAR["tempest"], ISOBAR["alert"], ISOBAR["storm_boundary"],
+    }:
+        return "break_opponent_board"
+    if bool(state.get("going_first")) and action_ids & {
+        ISOBAR["bastion"], ISOBAR["hawk"],
+    }:
+        return "build_first_turn_interaction"
+    if action_ids & {ISOBAR["argen"], ISOBAR["journal"], ISOBAR["hawk"]}:
+        return "preserve_follow_up"
+    return "resolve_current_legal_action"
+
+
+def verified_path(action: dict, obs: dict) -> list[str]:
+    """Return only effect paths justified by the audited card effect."""
+    profile = effect_identifier(action)
+    paths = {
+        "observatory_effect_1_weather_change": [
+            "activate_observatory", "observe_weather_before_next_effect"],
+        "argen_effect_1_on_summon_search": [
+            "search_isobar_spell_trap", "retain_normal_summon_follow_up"],
+        "argen_effect_2_weather_special_summon": [
+            "special_summon_argen_after_weather_event"],
+        "journal_effect_1_search_and_optional_send": [
+            "search_isobar_monster", "optionally_send_one_hand_isobar_to_grave"],
+        "hawk_effect_description:": [
+            "effect_description_required_before_hawk_activation"],
+        "bastion_effect_2_rain_monster_negate": [
+            "wait_for_opponent_monster_effect", "remove_one_material_to_negate"],
+        "tempest_effect_2_target_bounce": [
+            "target_opponent_field_card", "remove_one_material_to_bounce"],
+        "storm_boundary_effect_1_storm_bounce": [
+            "change_to_storm", "bounce_opponent_spell_trap"],
+        "storm_boundary_effect_2_recycle_and_draw": [
+            "banish_storm_boundary_as_cost", "recycle_grave_isobar", "draw_one"],
+    }
+    for prefix, path in paths.items():
+        if prefix.endswith(":") and profile.startswith(prefix):
+            return path
+    return paths.get(profile, ["effect_path_not_verified"])
+
+
+def expected_resource_change(action: dict) -> dict[str, Any]:
+    profile = effect_identifier(action)
+    changes = {
+        "argen_effect_1_on_summon_search": {"hand": "+1 isobar spell/trap"},
+        "journal_effect_1_search_and_optional_send": {
+            "hand": "+1 monster, optional -1 isobar card",
+            "grave": "optional +1 isobar card",
+        },
+        "hawk_effect_description:": {
+            "overlay": "-1 if activation resolves",
+            "hand": "+1 if search resolves",
+            "extra_deck": "machine-only until end phase",
+        },
+        "tempest_effect_2_target_bounce": {
+            "overlay": "-1 if cost paid",
+            "opponent_field": "-1 if target remains related",
+        },
+        "storm_boundary_effect_2_recycle_and_draw": {
+            "banished": "+1 storm boundary",
+            "grave": "-1 isobar monster",
+            "hand": "+1 draw",
+        },
+    }
+    for prefix, change in changes.items():
+        if prefix.endswith(":") and profile.startswith(prefix):
+            return change
+    return changes.get(profile, {"status": "not_derived_before_resolution"})
+
+
 def score(action: dict, obs: dict, weights: dict[str, float] | None = None) -> tuple[int, list[str]]:
     """Heuristic ranking only; does not certify a game action as legal."""
     weights = weights or load_strategy_config()
@@ -127,6 +218,7 @@ def score(action: dict, obs: dict, weights: dict[str, float] | None = None) -> t
     if not isinstance(target, dict):
         target = {}
     reasons: list[str] = []
+    effect_id = effect_identifier(action)
     value = round({
         "normal_summon": 35, "special_summon": 32, "xyz_summon": 40,
         "activate": 25, "chain": -15, "attack": 20, "set": 13,
@@ -226,6 +318,28 @@ def score(action: dict, obs: dict, weights: dict[str, float] | None = None) -> t
     if kind == "activate" and cid == ISOBAR["field"] and not own_field:
         bonus(100, "패의 중앙관측소를 즉시 발동")
 
+    if effect_id == "argen_effect_1_on_summon_search":
+        bonus(35, "아르젠 소환 성공 서치 효과")
+    elif effect_id == "argen_effect_2_weather_special_summon":
+        bonus(40 if own_field else -25, "기상 변경 후 아르젠 특수 소환 효과")
+    elif effect_id == "rain_effect_1_field_special_summon":
+        bonus(35 if own_field else -35, "중앙관측소가 있을 때 레인 특수 소환")
+    elif effect_id == "rain_effect_2_rain_graveyard_recovery":
+        bonus(35 if weather == "rain" else -45, "강우 상태 레인 묘지 회수")
+    elif effect_id == "sol_effect_1_sunny_send_to_grave":
+        bonus(35 if weather == "sun" and own_monsters > 1 else -30,
+              "맑음·다른 이소바르가 있을 때 솔 묘지 준비")
+    elif effect_id == "nova_effect_1_ally_special_summon":
+        bonus(34 if own_monsters > 0 else -45, "다른 이소바르가 있을 때 노바 전개")
+    elif effect_id == "observatory_effect_1_weather_change":
+        bonus(25 if weather != "unknown" else 0, "중앙관측소 기상 효과")
+    elif effect_id.startswith("bolt_effect_description:"):
+        bonus(-15, "볼트 효과 설명 식별 불가; 추측 발동 보류")
+    elif effect_id.startswith("zephyr_effect_description:"):
+        bonus(-15, "제피르 효과 설명 식별 불가; 추측 발동 보류")
+    elif effect_id.startswith("hawk_effect_description:"):
+        bonus(-10, "솔라 호크 효과 설명 식별 불가; runtime 식별자 기록")
+
     if kind == "activate":
         if cid in {ISOBAR["alert"], 14087893, 10045474} and opp_monsters == 0:
             bonus(-110, "상대 위협이 없을 때 견제 낭비 방지")
@@ -322,6 +436,7 @@ def decide(obs: dict, config: dict[str, float] | None = None) -> dict:
     )
     best = ranked[0][2]
     val, reasons = score(best, obs, weights)
+    goal = determine_strategy_goal(obs, actions)
     candidates = []
     for rank, (candidate_score, _, action) in enumerate(ranked, 1):
         _, candidate_reasons = score(action, obs, weights)
@@ -332,6 +447,9 @@ def decide(obs: dict, config: dict[str, float] | None = None) -> dict:
             "card_id": _integer(action.get("card_id")),
             "card_name": card_name(action.get("card_id")),
             "location": action.get("location", ""),
+            "effect_identifier": effect_identifier(action),
+            "effect_description": action.get("effect_description"),
+            "activation_index": action.get("activation_index"),
             "score": candidate_score,
             "reasons": candidate_reasons,
         })
@@ -346,6 +464,16 @@ def decide(obs: dict, config: dict[str, float] | None = None) -> dict:
         # Keep the compact field for older Executor builds.
         "ranked": [{"action_id": item["action_id"], "score": item["score"]}
                     for item in candidates[:5]],
+        "strategy_goal": goal,
+        "chosen_path": verified_path(best, obs),
+        "major_alternatives": [
+            {"action_id": item["action_id"], "score": item["score"],
+             "reason": "; ".join(item["reasons"])}
+            for item in candidates[1:4]
+        ],
+        "expected_resource_change": expected_resource_change(best),
+        "actual_result": "unobserved_before_execution",
+        "plan_change_reason": "no_post_action_observation_received",
     }
 
 
