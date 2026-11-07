@@ -5,6 +5,7 @@ on:
     branches:
       - feat/duelmind-v1-windbot-executor
       - feat/duelmind-v1-ipc-bridge
+      - feat/duelmind-v1-3-main-chain
   workflow_dispatch:
 
 jobs:
@@ -35,6 +36,8 @@ jobs:
           Copy-Item "duelmind/windbot/AI_DuelmindIsobar.ydk" "_windbot/Decks/AI_DuelmindIsobar.ydk" -Force
           python duelmind/windbot/register_bot.py _windbot/bots.json
           if ($LASTEXITCODE -ne 0) { throw "Could not register DUELMIND bot" }
+          python duelmind/windbot/patch_gameai.py _windbot
+          if ($LASTEXITCODE -ne 0) { throw "Could not patch WindBot GameAI" }
 
       - name: Build custom EDOPro CDB
         shell: pwsh
