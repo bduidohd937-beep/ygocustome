@@ -301,7 +301,7 @@ namespace WindBot.Game.AI.Decks
 
         // Called only from our guarded WindBot GameAI patch.
         // Candidates are taken from MainPhase, populated by the EDOPro engine.
-        public MainPhaseAction TryDecideMainPhase(MainPhase main)
+        public override MainPhaseAction TryDecideMainPhase(MainPhase main)
         {
             if (main == null)
                 return null;
@@ -341,7 +341,7 @@ namespace WindBot.Game.AI.Decks
 
         // EDOPro provided every chain card in this list. An optional 'pass'
         // is represented as a choice, and never sent to the engine as a card.
-        public int TryDecideChain(IList<ClientCard> cards, bool forced)
+        public override int TryDecideChain(IList<ClientCard> cards, bool forced)
         {
             if (cards == null || cards.Count == 0)
                 return -2;
