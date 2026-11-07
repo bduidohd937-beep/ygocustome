@@ -70,9 +70,9 @@ def score(action: dict, obs: dict) -> tuple[int, list[str]]:
     reasons: list[str] = []
     value = {
         "normal_summon": 35, "special_summon": 32, "xyz_summon": 40,
-        "activate": 25, "chain": 30, "attack": 20, "set": 13,
+        "activate": 25, "chain": -15, "attack": 20, "set": 13,
         "change_position": 5, "select_card": 0, "choose": 0,
-        "pass": -60, "end_phase": -45,
+        "pass": 5, "end_phase": -45,
     }[kind]
 
     def bonus(amount: int, reason: str) -> None:
@@ -80,6 +80,12 @@ def score(action: dict, obs: dict) -> tuple[int, list[str]]:
         value += amount
         reasons.append(reason)
 
+    if kind == "chain" and enemy_threat > 0 and cid in {
+        14558127, 97268402, 10045474, 14087893,
+    }:
+        bonus(50, "상대 전개에 대한 범용 견제")
+    if kind == "chain" and cid == ISOBAR["front"] and enemy_threat > 0:
+        bonus(25, "상대 턴 기상 변경")
     if cid == ISOBAR["argen"] and kind in {"normal_summon", "special_summon"}:
         bonus(38, "초동 서치 확보")
     if cid == ISOBAR["field"] and kind == "activate":
