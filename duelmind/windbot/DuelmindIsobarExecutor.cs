@@ -113,7 +113,7 @@ namespace WindBot.Game.AI.Decks
 
         private bool HasWeatherStation()
         {
-            return Bot.HasInSpellZone(C.Observatory, true);
+            return Bot.HasInSpellZone(C.Observatory, true, true);
         }
 
         private bool EnemyHasCards()
@@ -203,7 +203,7 @@ namespace WindBot.Game.AI.Decks
             message.Append("\"own_monster_count\":").Append(Bot.GetMonsterCount()).Append(",");
             message.Append("\"opponent_monster_count\":").Append(Enemy.GetMonsterCount()).Append(",");
             message.Append("\"hand_count\":").Append(Bot.Hand.Count).Append(",");
-            bool hasField = Bot.HasInSpellZone(C.Observatory, true);
+            bool hasField = Bot.HasInSpellZone(C.Observatory, true, true);
             message.Append("\"own_field_spell\":").Append(hasField ? "true" : "false").Append(",");
             int lv4Count = 0;
             foreach (var c in Bot.MonsterZone)
