@@ -7,6 +7,9 @@ The server has no access to game memory; caller supplies only permitted choices.
 import argparse
 import json
 import socketserver
+import tempfile
+import threading
+from datetime import datetime, timezone
 import sys
 from pathlib import Path
 
@@ -14,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from engine import decide, InvalidObservation
 
 MAX_BYTES = 65536
+LOG_LOCK = threading.Lock()
 
 
 class Handler(socketserver.StreamRequestHandler):
@@ -30,9 +34,30 @@ class Handler(socketserver.StreamRequestHandler):
             result = {"protocol": "duelmind.v1", "error": str(error)}
         self._reply(result)
         if "action_id" in result:
-            print("[DUELMIND] selected={} score={} reason={}".format(result["action_id"], result.get("score"), result.get("reason")), flush=True)
+            chosen = next((a for a in observation["legal_actions"]
+                           if a["action_id"] == result["action_id"]), {})
+            print("[DUELMIND] {} card={} action={} score={} reason={}".format(
+                chosen.get("kind"), chosen.get("card_id"),
+                result["action_id"], result.get("score"), result.get("reason")
+            ), flush=True)
+            self._log_decision(observation, result)
         else:
             print("[DUELMIND] rejected request: {}".format(result.get("error")), flush=True)
+
+    def _log_decision(self, observation, result):
+        filename = getattr(self.server, "decision_log", None)
+        if not filename:
+            return
+        record = {"timestamp": datetime.now(timezone.utc).isoformat(),
+                  "observation": observation, "decision": result}
+        try:
+            with LOG_LOCK:
+                if filename.exists() and filename.stat().st_size > 3_000_000:
+                    filename.replace(filename.with_suffix(".old.jsonl"))
+                with filename.open("a", encoding="utf-8") as stream:
+                    stream.write(json.dumps(record, ensure_ascii=False) + "\n")
+        except OSError:
+            pass  # Diagnostic output cannot prevent a duel.
 
     def _reply(self, payload):
         try:
@@ -50,11 +75,16 @@ class LocalServer(socketserver.ThreadingTCPServer):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--port", type=int, default=28741)
+    p.add_argument("--no-decision-log", action="store_true")
     args = p.parse_args()
     if not 1024 <= args.port <= 65535:
         p.error("port must be between 1024 and 65535")
     with LocalServer(("127.0.0.1", args.port), Handler) as srv:
-        print(f"DUELMIND V1 ready: 127.0.0.1:{args.port}", flush=True)
+        srv.decision_log = (None if args.no_decision_log else
+                            Path(tempfile.gettempdir()) / "duelmind-decisions.jsonl")
+        print(f"DUELMIND V1.5 ready: 127.0.0.1:{args.port}", flush=True)
+        if srv.decision_log:
+            print(f"Decision log: {srv.decision_log}", flush=True)
         try:
             srv.serve_forever()
         except KeyboardInterrupt:
