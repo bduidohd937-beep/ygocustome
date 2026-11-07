@@ -29,6 +29,10 @@ class Handler(socketserver.StreamRequestHandler):
         except (InvalidObservation, ValueError, UnicodeError, TypeError) as error:
             result = {"protocol": "duelmind.v1", "error": str(error)}
         self._reply(result)
+        if "action_id" in result:
+            print("[DUELMIND] selected={} score={} reason={}".format(result["action_id"], result.get("score"), result.get("reason")), flush=True)
+        else:
+            print("[DUELMIND] rejected request: {}".format(result.get("error")), flush=True)
 
     def _reply(self, payload):
         try:
