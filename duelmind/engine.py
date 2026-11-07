@@ -6,6 +6,7 @@ must enumerate the exact legal choices and execute the returned action_id.
 from __future__ import annotations
 from typing import Any
 import json
+from pathlib import Path
 
 ISOBAR = {
     "argen": 210000201, "rain": 210000202, "bolt": 210000203,
@@ -21,6 +22,34 @@ KINDS = {
     "choose", "chain", "select_card", "battle_phase",
 }
 MAX_CHOICES = 512
+CONFIG_PATH = Path(__file__).with_name("strategy.json")
+DEFAULT_WEIGHTS = {
+    "immediate_gain": 1.0,
+    "follow_up": 1.0,
+    "interaction": 1.0,
+    "resource_preservation": 1.0,
+    "board_persistence": 1.0,
+    "win_contribution": 1.0,
+    "weather_synergy": 1.0,
+}
+CARD_NAMES = {
+    210000201: "흑철기상청 - 이소바르 아르젠",
+    210000202: "흑철기상청 - 이소바르 레인",
+    210000203: "흑철기상청 - 이소바르 볼트",
+    210000204: "흑철기상청 - 이소바르 솔",
+    210000205: "흑철기상청 - 이소바르 노바",
+    210000206: "흑철기상청 - 이소바르 제피르",
+    210000207: "흑철기상청 - 이소바르 솔라 호크",
+    210000208: "흑철기상청 - 이소바르 스톰바스티온",
+    210000209: "흑철기상청 - 이소바르 템페스트 제로",
+    210000210: "흑철기상청 - 중앙관측소",
+    210000211: "이소바르의 기압전선",
+    210000212: "이소바르의 관측일지",
+    210000213: "이소바르의 긴급경보",
+    210000214: "흑철기상청 - 이소바르 시러스",
+    210000215: "흑철기상청 - 이소바르 님버스",
+    210000216: "이소바르의 폭풍경계",
+}
 
 
 class InvalidObservation(ValueError):
@@ -50,8 +79,30 @@ def validate(obs: dict) -> list[dict]:
     return choices
 
 
-def score(action: dict, obs: dict) -> tuple[int, list[str]]:
+def load_strategy_config(path: Path | None = None) -> dict[str, float]:
+    """Load bounded scoring weights without changing the legal-action contract."""
+    weights = dict(DEFAULT_WEIGHTS)
+    config_path = path or CONFIG_PATH
+    try:
+        raw = json.loads(config_path.read_text(encoding="utf-8"))
+        raw_weights = raw.get("weights", {}) if isinstance(raw, dict) else {}
+        if isinstance(raw_weights, dict):
+            for key in weights:
+                value = raw_weights.get(key)
+                if isinstance(value, (int, float)) and value == value:
+                    weights[key] = max(0.0, min(3.0, float(value)))
+    except (OSError, ValueError, TypeError):
+        pass
+    return weights
+
+
+def card_name(card_id: Any) -> str:
+    return CARD_NAMES.get(_integer(card_id), "알 수 없는 카드")
+
+
+def score(action: dict, obs: dict, weights: dict[str, float] | None = None) -> tuple[int, list[str]]:
     """Heuristic ranking only; does not certify a game action as legal."""
+    weights = weights or load_strategy_config()
     state = obs.get("public_state") or {}
     if not isinstance(state, dict):
         state = {}
@@ -76,13 +127,13 @@ def score(action: dict, obs: dict) -> tuple[int, list[str]]:
     if not isinstance(target, dict):
         target = {}
     reasons: list[str] = []
-    value = {
+    value = round({
         "normal_summon": 35, "special_summon": 32, "xyz_summon": 40,
         "activate": 25, "chain": -15, "attack": 20, "set": 13,
         "change_position": 5, "select_card": 0, "choose": 0,
         "battle_phase": 22,
         "pass": 5, "end_phase": -45,
-    }[kind]
+    }[kind] * weights["immediate_gain"])
 
     def bonus(amount: int, reason: str) -> None:
         nonlocal value
@@ -233,6 +284,26 @@ def score(action: dict, obs: dict) -> tuple[int, list[str]]:
             atk = max(0, _integer(target.get("attack")))
             bonus(15 + min(35, atk // 80), "공개된 상대 위협 카드 우선")
 
+    # The adapter may provide verified, engine-derived annotations. Unverified
+    # future state is deliberately ignored; this is bounded evaluation, not a
+    # game simulator.
+    evaluation = action.get("verified_evaluation")
+    if isinstance(evaluation, dict):
+        labels = {
+            "immediate_gain": "즉시 이득",
+            "follow_up": "검증된 후속 전개",
+            "interaction": "상대 견제력",
+            "resource_preservation": "자원 보존",
+            "board_persistence": "필드 지속성",
+            "win_contribution": "승리 기여도",
+            "weather_synergy": "기상 연계",
+        }
+        for key, label in labels.items():
+            amount = evaluation.get(key)
+            if isinstance(amount, (int, float)) and amount == amount:
+                bounded = max(-50.0, min(50.0, float(amount)))
+                bonus(round(bounded * weights[key]), f"{label} 평가")
+
     # Hints may only be computed by an engine adapter, never from user prose.
     hints = action.get("trusted_hints")
     if isinstance(hints, dict):
@@ -242,20 +313,39 @@ def score(action: dict, obs: dict) -> tuple[int, list[str]]:
     return value, reasons
 
 
-def decide(obs: dict) -> dict:
+def decide(obs: dict, config: dict[str, float] | None = None) -> dict:
     actions = validate(obs)
+    weights = config or load_strategy_config()
     ranked = sorted(
-        ((score(a, obs)[0], -i, a) for i, a in enumerate(actions)),
+        ((score(a, obs, weights)[0], -i, a) for i, a in enumerate(actions)),
         key=lambda x: (x[0], x[1]), reverse=True
     )
     best = ranked[0][2]
-    val, reasons = score(best, obs)
+    val, reasons = score(best, obs, weights)
+    candidates = []
+    for rank, (candidate_score, _, action) in enumerate(ranked, 1):
+        _, candidate_reasons = score(action, obs, weights)
+        candidates.append({
+            "rank": rank,
+            "action_id": action["action_id"],
+            "kind": action["kind"],
+            "card_id": _integer(action.get("card_id")),
+            "card_name": card_name(action.get("card_id")),
+            "location": action.get("location", ""),
+            "score": candidate_score,
+            "reasons": candidate_reasons,
+        })
     return {
         "protocol": "duelmind.v1",
         "action_id": best["action_id"],
         "score": val,
         "reason": "; ".join(reasons),
-        "ranked": [{"action_id": a["action_id"], "score": v} for v, _, a in ranked[:5]],
+        "fallback": False,
+        "candidate_count": len(candidates),
+        "candidates": candidates,
+        # Keep the compact field for older Executor builds.
+        "ranked": [{"action_id": item["action_id"], "score": item["score"]}
+                    for item in candidates[:5]],
     }
 
 

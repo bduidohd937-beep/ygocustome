@@ -48,8 +48,12 @@ class Handler(socketserver.StreamRequestHandler):
         filename = getattr(self.server, "decision_log", None)
         if not filename:
             return
+        state = observation.get("public_state") or {}
         record = {"timestamp": datetime.now(timezone.utc).isoformat(),
-                  "observation": observation, "decision": result}
+                  "turn": state.get("turn"),
+                  "phase": state.get("phase"),
+                  "observation": observation, "decision": result,
+                  "execution_result": "decision_returned_to_windbot"}
         try:
             with LOG_LOCK:
                 if filename.exists() and filename.stat().st_size > 3_000_000:

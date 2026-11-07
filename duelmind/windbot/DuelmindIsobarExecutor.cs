@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Text.Json;
 using WindBot.Game;
 using WindBot.Game.AI;
 using YGOSharp.OCGWrapper.Enums;
@@ -32,6 +33,71 @@ namespace WindBot.Game.AI.Decks
             catch (Exception)
             {
                 // Logging must never interrupt a duel.
+            }
+        }
+
+        private static string CardName(int id)
+        {
+            switch (id)
+            {
+                case C.Argen: return "흑철기상청 - 이소바르 아르젠";
+                case C.Rain: return "흑철기상청 - 이소바르 레인";
+                case C.Bolt: return "흑철기상청 - 이소바르 볼트";
+                case C.Sol: return "흑철기상청 - 이소바르 솔";
+                case C.Nova: return "흑철기상청 - 이소바르 노바";
+                case C.Zephyr: return "흑철기상청 - 이소바르 제피르";
+                case C.Hawk: return "흑철기상청 - 이소바르 솔라 호크";
+                case C.Bastion: return "흑철기상청 - 이소바르 스톰바스티온";
+                case C.Tempest: return "흑철기상청 - 이소바르 템페스트 제로";
+                case C.Observatory: return "흑철기상청 - 중앙관측소";
+                case C.Front: return "이소바르의 기압전선";
+                case C.Journal: return "이소바르의 관측일지";
+                case C.Alert: return "이소바르의 긴급경보";
+                case C.Cirrus: return "흑철기상청 - 이소바르 시러스";
+                case C.Nimbus: return "흑철기상청 - 이소바르 님버스";
+                case C.StormBoundary: return "이소바르의 폭풍경계";
+                default: return "알 수 없는 카드";
+            }
+        }
+
+        private void TraceDecision(IList<DuelmindChoice> choices,
+            int selected, bool fallback, string reason)
+        {
+            try
+            {
+                var candidates = new List<Dictionary<string, object>>();
+                if (choices != null)
+                {
+                    for (int i = 0; i < choices.Count; i++)
+                    {
+                        var card = choices[i].Card;
+                        int id = card == null || (card.Controller != 0 && !card.IsFaceup()) ? 0 : card.Id;
+                        candidates.Add(new Dictionary<string, object> {
+                            ["action_id"] = i.ToString(),
+                            ["kind"] = choices[i].Kind,
+                            ["card_id"] = id,
+                            ["card_name"] = CardName(id),
+                            ["selected"] = i == selected,
+                            ["score"] = null,
+                        });
+                    }
+                }
+                var record = new Dictionary<string, object> {
+                    ["timestamp"] = DateTime.UtcNow.ToString("o"),
+                    ["turn"] = Duel.Turn,
+                    ["phase"] = Duel.Phase.ToString(),
+                    ["fallback"] = fallback,
+                    ["fallback_reason"] = reason,
+                    ["selected_index"] = selected,
+                    ["candidates"] = candidates,
+                    ["execution_result"] = selected >= 0 ? "action_returned_to_windbot" : "no_action_returned",
+                };
+                File.AppendAllText(Path.Combine(Path.GetTempPath(), "duelmind-decisions.jsonl"),
+                    JsonSerializer.Serialize(record) + Environment.NewLine);
+            }
+            catch (Exception)
+            {
+                // Diagnostics must never interrupt a duel.
             }
         }
         private static class C
@@ -201,13 +267,73 @@ namespace WindBot.Game.AI.Decks
             public int ChainIndex;
         }
 
+        private static Dictionary<string, int> VerifiedEvaluation(DuelmindChoice choice)
+        {
+            if (choice == null || choice.Card == null)
+                return null;
+            var result = new Dictionary<string, int>();
+            switch (choice.Card.Id)
+            {
+                case C.Observatory:
+                    result["immediate_gain"] = 30;
+                    result["follow_up"] = 45;
+                    result["weather_synergy"] = 35;
+                    result["resource_preservation"] = 25;
+                    break;
+                case C.Argen:
+                    result["immediate_gain"] = 25;
+                    result["follow_up"] = 45;
+                    result["resource_preservation"] = 20;
+                    break;
+                case C.Journal:
+                    result["follow_up"] = 35;
+                    result["resource_preservation"] = 30;
+                    break;
+                case C.Rain:
+                case C.Nova:
+                case C.Zephyr:
+                case C.Cirrus:
+                case C.Nimbus:
+                    result["follow_up"] = 35;
+                    result["resource_preservation"] = 20;
+                    break;
+                case C.Hawk:
+                    result["follow_up"] = 45;
+                    result["resource_preservation"] = 25;
+                    result["board_persistence"] = 25;
+                    break;
+                case C.Bastion:
+                    result["interaction"] = 45;
+                    result["board_persistence"] = 40;
+                    break;
+                case C.Tempest:
+                    result["interaction"] = 50;
+                    result["win_contribution"] = 35;
+                    break;
+                case C.Front:
+                case C.StormBoundary:
+                    result["interaction"] = 35;
+                    result["weather_synergy"] = 35;
+                    break;
+                case C.Alert:
+                    result["interaction"] = 45;
+                    result["board_persistence"] = 25;
+                    break;
+            }
+            return result.Count == 0 ? null : result;
+        }
+
         private int AskActionChoices(IList<DuelmindChoice> choices)
         {
             Trace("python decision requested; choices=" + (choices == null ? 0 : choices.Count));
             if (choices == null || choices.Count == 0 || choices.Count > 512)
+            {
+                TraceDecision(choices, -1, true, "invalid_or_empty_legal_actions");
                 return -1;
+            }
             var message = new StringBuilder(600 + choices.Count * 210);
             message.Append("{\"protocol\":\"duelmind.v1\",\"public_state\":{");
+            message.Append("\"turn\":").Append(Duel.Turn).Append(",");
             message.Append("\"phase\":\"").Append(Duel.Phase.ToString().ToLowerInvariant()).Append("\",");
             message.Append("\"going_first\":").Append(Duel.IsFirst ? "true" : "false").Append(",");
             message.Append("\"own_monster_count\":").Append(Bot.GetMonsterCount()).Append(",");
@@ -215,6 +341,10 @@ namespace WindBot.Game.AI.Decks
             message.Append("\"hand_count\":").Append(Bot.Hand.Count).Append(",");
             bool hasField = Bot.HasInSpellZone(C.Observatory, true, true);
             message.Append("\"own_field_spell\":").Append(hasField ? "true" : "false").Append(",");
+            // The weather flag is stored inside the Lua Field Spell and is not
+            // exposed by WindBot's ClientCard API. Keep it explicit so a future
+            // engine adapter can fill it without changing the protocol.
+            message.Append("\"weather\":\"unknown\",");
             int lv4Count = 0;
             foreach (var c in Bot.MonsterZone)
                 if (c != null && c.IsFaceup() && c.IsMonster() && c.Level == 4)
@@ -254,6 +384,8 @@ namespace WindBot.Game.AI.Decks
                 message.Append("{\"action_id\":\"").Append(i).Append("\",");
                 message.Append("\"kind\":\"").Append(choice.Kind).Append("\",");
                 message.Append("\"card_id\":").Append(c == null || (c.Controller != 0 && !c.IsFaceup()) ? 0 : c.Id).Append(",");
+                int visibleId = c == null || (c.Controller != 0 && !c.IsFaceup()) ? 0 : c.Id;
+                message.Append("\"card_name\":").Append(JsonSerializer.Serialize(CardName(visibleId))).Append(",");
                 message.Append("\"location\":\"").Append(c == null ? "" :
                     c.Location.ToString().ToLowerInvariant()).Append("\",");
                 message.Append("\"controller\":").Append(c == null ? -1 : c.Controller).Append(",");
@@ -262,6 +394,15 @@ namespace WindBot.Game.AI.Decks
                 message.Append("\"high_value\":").Append(c != null &&
                     c.Controller == 0 && IsPriorityOwnCard(c.Id) ? "true" : "false").Append(",");
                 message.Append("\"attack\":").Append(visible ? c.Attack : 0).Append("}}");
+                var evaluation = VerifiedEvaluation(choice);
+                if (evaluation != null)
+                {
+                    // Insert the annotation before the closing object. The
+                    // target object above is intentionally kept engine-neutral.
+                    string suffix = "}";
+                    int end = message.Length - suffix.Length;
+                    message.Insert(end, ",\"verified_evaluation\":" + JsonSerializer.Serialize(evaluation));
+                }
             }
             message.Append("]}");
             try
@@ -294,8 +435,12 @@ namespace WindBot.Game.AI.Decks
                                 if (selected == null || selected.Error != null ||
                                     !int.TryParse(selected.ActionId, out index) ||
                                     index < 0 || index >= choices.Count)
+                                {
+                                    TraceDecision(choices, -1, true, "invalid_python_response");
                                     return -1;
+                                }
                                 Trace("python accepted selected index=" + index);
+                                TraceDecision(choices, index, false, "python_strategy");
                                 return index;
                             }
                         }
@@ -305,6 +450,7 @@ namespace WindBot.Game.AI.Decks
             catch (Exception ex)
             {
                 Trace("python connection failed: " + ex.GetType().Name + " " + ex.Message);
+                TraceDecision(choices, -1, true, "python_connection_failed");
                 return -1;
             }
         }
@@ -369,33 +515,42 @@ namespace WindBot.Game.AI.Decks
                 return choices[selected].Action;
             }
             Trace("main phase decision unavailable; using legal fallback");
-            return FallbackMainPhaseAction(choices);
+            int fallbackIndex = FindFallbackIndex(choices);
+            TraceDecision(choices, fallbackIndex, true, "python_unavailable_or_invalid");
+            return choices[fallbackIndex].Action;
         }
 
         private MainPhaseAction FallbackMainPhaseAction(IList<DuelmindChoice> choices)
         {
+            return choices[FindFallbackIndex(choices)].Action;
+        }
+
+        private int FindFallbackIndex(IList<DuelmindChoice> choices)
+        {
+            if (choices == null || choices.Count == 0)
+                return -1;
             foreach (var choice in choices)
                 if (choice.Card != null && choice.Card.Id == C.Observatory && choice.Kind == "activate")
-                    return choice.Action;
+                    return choices.IndexOf(choice);
             foreach (var choice in choices)
                 if (choice.Card != null && (choice.Card.Id == C.Argen || choice.Card.Id == C.Cirrus) &&
                     (choice.Kind == "normal_summon" || choice.Kind == "special_summon"))
-                    return choice.Action;
+                    return choices.IndexOf(choice);
             foreach (var choice in choices)
                 if (choice.Card != null && (choice.Card.Id == C.Rain || choice.Card.Id == C.Nova ||
                     choice.Card.Id == C.Zephyr || choice.Card.Id == C.Nimbus) &&
                     (choice.Kind == "special_summon" || choice.Kind == "activate"))
-                    return choice.Action;
+                    return choices.IndexOf(choice);
             foreach (var choice in choices)
                 if (choice.Kind == "xyz_summon")
-                    return choice.Action;
+                    return choices.IndexOf(choice);
             foreach (var choice in choices)
                 if (choice.Kind == "battle_phase")
-                    return choice.Action;
+                    return choices.IndexOf(choice);
             foreach (var choice in choices)
                 if (choice.Kind == "end_phase")
-                    return choice.Action;
-            return choices[0].Action;
+                    return choices.IndexOf(choice);
+            return 0;
         }
 
         // EDOPro provided every chain card in this list. An optional 'pass'

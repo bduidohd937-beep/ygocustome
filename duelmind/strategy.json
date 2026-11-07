@@ -1,0 +1,11 @@
+{
+  "weights": {
+    "immediate_gain": 1.0,
+    "follow_up": 1.15,
+    "interaction": 1.1,
+    "resource_preservation": 1.05,
+    "board_persistence": 1.1,
+    "win_contribution": 1.2,
+    "weather_synergy": 1.1
+  }
+}
