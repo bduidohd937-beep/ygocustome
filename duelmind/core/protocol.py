@@ -39,7 +39,8 @@ def finish(obs, result):
                 duel_id=obs['duel_id'], profile_id=obs['profile_id'],
                 turn=state.get('turn', 'unknown'), phase=state.get('phase', 'unknown'),
                 decision_point=obs['decision_point'],
-                effect_identifier=chosen.get('effect_profile', 'unknown'),
+                effect_identifier=('unknown' if obs.get('card_baseline') else
+                                   chosen.get('effect_profile', 'unknown')),
                 legal_actions=obs['legal_actions'], selected_action=chosen['action_id'],
                 state_hash=state_hash(obs),
                 post_action_observation={'status': 'unknown',

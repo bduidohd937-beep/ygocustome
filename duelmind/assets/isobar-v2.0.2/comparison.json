@@ -1,0 +1,839 @@
+[
+  {
+    "id": 210000201,
+    "current_name": "흑철기상청 - 이소바르 아르젠",
+    "legacy_card": {
+      "id": 210000201,
+      "name": "흑철기상청 - 이소바르 아르젠",
+      "desc": "① 일반/특수 소환 성공 시 덱에서 「흑철기상청 - 중앙관측소」 또는 「이소바르」 마법/함정 카드 1장을 패에 넣는다. ② 자신의 「중앙관측소」의 기상이 변경되었을 경우, 패의 이 카드를 특수 소환할 수 있다. 이 카드명의 ①②의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1600,
+      "def": 1200,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000201,
+      "name": "흑철기상청 - 이소바르 아르젠",
+      "desc": "①: 이 카드가 일반 소환 또는 특수 소환에 성공했을 경우에 발동할 수 있다. 덱에서 「흑철기상청-중앙관측소」 1장 또는 「이소바르」 마법·함정 카드 1장을 패에 넣는다. ②: 자신의 「흑철기상청-중앙관측소」의 기상이 변경되었을 경우에 발동할 수 있다. 패 또는 묘지에서 이 카드를 특수 소환한다. 이 효과로 특수 소환한 이 카드는 필드에서 벗어났을 경우에 제외된다. 이 카드명의 ①②의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1600,
+      "def": 1200,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e1:SetProperty(EFFECT_FLAG_DELAY); e1:SetCode(EVENT_SUMMON_SUCCESS); e1:SetCountLimit(1,id); e1:SetTarget(s.thtg); e1:SetOperation(s.thop); c:RegisterEffect(e1)",
+      "local e2=e1:Clone(); e2:SetCode(EVENT_SPSUMMON_SUCCESS); c:RegisterEffect(e2)",
+      "local e3=Effect.CreateEffect(c); e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O); e3:SetProperty(EFFECT_FLAG_DELAY); e3:SetCode(ISOBAR.EVENT); e3:SetRange(LOCATION_HAND+LOCATION_GRAVE); e3:SetCountLimit(1,id+1000); e3:SetCondition(function(e,tp) return ISOBAR.Field(tp)~=nil end); e3:SetTarget(s.sptg); e3:SetOperation(s.spop); c:RegisterEffect(e3)",
+      "function s.spop(e,tp) local c=e:GetHandler(); if c:IsRelateToEffect(e) then local fromgrave=c:IsLocation(LOCATION_GRAVE); if Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 and fromgrave then local x=Effect.CreateEffect(c); x:SetType(EFFECT_TYPE_SINGLE); x:SetCode(EFFECT_LEAVE_FIELD_REDIRECT); x:SetProperty(EFFECT_FLAG_CANNOT_DISABLE); x:SetReset(RESET_EVENT+RESETS_REDIRECT); x:SetValue(LOCATION_REMOVED); c:RegisterEffect(x,true) end end end"
+    ],
+    "review_notes": [
+      "hand/grave revival; legacy hand-only",
+      "design says leave-field banish for this effect; Lua only adds redirect when revived from grave"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000202,
+    "current_name": "흑철기상청 - 이소바르 레인",
+    "legacy_card": {
+      "id": 210000202,
+      "name": "흑철기상청 - 이소바르 레인",
+      "desc": "① 자신 필드에 「흑철기상청 - 중앙관측소」가 존재할 경우, 패의 이 카드를 특수 소환할 수 있다. ② 이 카드가 일반/특수 소환되었을 경우, 기상이 「강우」라면 자신의 묘지의 「이소바르」 카드 1장을 대상으로 하고 패에 넣는다. ①② 각각 1턴에 1번.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1400,
+      "def": 1800,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000202,
+      "name": "흑철기상청 - 이소바르 레인",
+      "desc": "①: 자신 필드에 「이소바르」 몬스터 또는 「흑철기상청-중앙관측소」가 존재할 경우에 발동할 수 있다. 패에서 이 카드를 특수 소환한다. ②: 이 카드가 일반 소환 또는 특수 소환에 성공했을 경우, 기상이 강우인 경우에 발동할 수 있다. 자신의 묘지에서 「이소바르」 카드 1장을 패에 넣는다. 이 카드명의 ①②의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1400,
+      "def": 1800,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_IGNITION); e1:SetRange(LOCATION_HAND); e1:SetCountLimit(1,id); e1:SetCategory(CATEGORY_SPECIAL_SUMMON); e1:SetTarget(s.sptg); e1:SetOperation(s.spop); c:RegisterEffect(e1)",
+      "local e2=Effect.CreateEffect(c); e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e2:SetProperty(EFFECT_FLAG_DELAY); e2:SetCode(EVENT_SUMMON_SUCCESS); e2:SetCountLimit(1,id+1000); e2:SetCondition(s.thcon); e2:SetTarget(s.thtg); e2:SetOperation(s.thop); c:RegisterEffect(e2); local e3=e2:Clone(); e3:SetCode(EVENT_SPSUMMON_SUCCESS); c:RegisterEffect(e3)"
+    ],
+    "review_notes": [
+      "field spell OR ally enables hand ignition",
+      "recovery uses resolution selection, not legacy target"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000203,
+    "current_name": "흑철기상청 - 이소바르 볼트",
+    "legacy_card": {
+      "id": 210000203,
+      "name": "흑철기상청 - 이소바르 볼트",
+      "desc": "① 자신 필드의 다른 「이소바르」 몬스터 1장을 대상으로 발동할 수 있다. 그 몬스터와 이 카드의 레벨을 턴 종료시까지 4로 한다. ② 기상이 「폭풍」인 경우 상대 필드의 앞면 몬스터 1장을 대상으로 발동할 수 있다. 그 공격력을 턴 종료시까지 800 내린다. ①② 각각 1턴에 1번.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1800,
+      "def": 1000,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000203,
+      "name": "흑철기상청 - 이소바르 볼트",
+      "desc": "①: 자신 필드에 「이소바르」 몬스터가 존재할 경우에 발동할 수 있다. 패에서 이 카드를 특수 소환한다. ②: 자신·상대 메인 페이즈에 발동할 수 있다. 자신의 「흑철기상청-중앙관측소」의 기상을 다른 기상으로 변경한다. 이 효과의 발동 후, 턴 종료시까지 자신은 기계족 몬스터밖에 엑스트라 덱에서 특수 소환할 수 없다. 이 카드명의 ①②의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1800,
+      "def": 1000,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_IGNITION); e1:SetRange(LOCATION_HAND); e1:SetCountLimit(1,id); e1:SetCategory(CATEGORY_SPECIAL_SUMMON); e1:SetTarget(s.sptg); e1:SetOperation(s.spop); c:RegisterEffect(e1)",
+      "local e2=Effect.CreateEffect(c); e2:SetType(EFFECT_TYPE_QUICK_O); e2:SetCode(EVENT_FREE_CHAIN); e2:SetRange(LOCATION_MZONE); e2:SetCountLimit(1,id+1000); e2:SetCondition(function(e) return Duel.GetCurrentPhase()==PHASE_MAIN1 or Duel.GetCurrentPhase()==PHASE_MAIN2 end); e2:SetTarget(s.wxtg); e2:SetOperation(s.wxop); c:RegisterEffect(e2)"
+    ],
+    "review_notes": [
+      "legacy level/ATK effects replaced by hand summon and main-phase weather change; machine Extra lock"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000204,
+    "current_name": "흑철기상청 - 이소바르 솔",
+    "legacy_card": {
+      "id": 210000204,
+      "name": "흑철기상청 - 이소바르 솔",
+      "desc": "① 기상이 「맑음」인 경우 자신 필드에 다른 「이소바르」 몬스터가 존재할 때 덱에서 「이소바르」 몬스터 1장을 묘지로 보낼 수 있다. ② 이 카드가 엑시즈 소재로 제거되어 묘지로 보내졌을 경우, 자신 LP를 500 회복한다. ①② 각각 1턴에 1번.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1200,
+      "def": 1600,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000204,
+      "name": "흑철기상청 - 이소바르 솔",
+      "desc": "①: 이 카드가 일반 소환 또는 특수 소환에 성공했을 경우에 발동할 수 있다. 덱에서 이 카드 이외의 「이소바르」 몬스터 1장을 묘지로 보낸다. ②: 이 카드가 엑시즈 소재로서 묘지로 보내졌을 경우에 발동할 수 있다. 자신의 묘지에서 「이소바르」 카드 1장을 고르고 덱으로 되돌린다. 기상이 맑음인 경우, 추가로 자신은 1장 드로우한다. 이 카드명의 ①②의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1200,
+      "def": 1600,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e1:SetProperty(EFFECT_FLAG_DELAY); e1:SetCode(EVENT_SUMMON_SUCCESS); e1:SetCountLimit(1,id); e1:SetCategory(CATEGORY_TOGRAVE); e1:SetTarget(s.tgtg); e1:SetOperation(s.tgop); c:RegisterEffect(e1); local e2=e1:Clone(); e2:SetCode(EVENT_SPSUMMON_SUCCESS); c:RegisterEffect(e2)",
+      "local e3=Effect.CreateEffect(c); e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e3:SetProperty(EFFECT_FLAG_DELAY); e3:SetCode(EVENT_TO_GRAVE); e3:SetCountLimit(1,id+1000); e3:SetCondition(function(e) return e:GetHandler():IsPreviousLocation(LOCATION_OVERLAY) end); e3:SetTarget(s.tdtg); e3:SetOperation(s.tdop); c:RegisterEffect(e3)"
+    ],
+    "review_notes": [
+      "legacy sunny send/LP recovery replaced by summon mill and detach recycle/draw",
+      "design excludes self from mill; Lua tgfilter does not exclude same ID"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000205,
+    "current_name": "흑철기상청 - 이소바르 노바",
+    "legacy_card": {
+      "id": 210000205,
+      "name": "흑철기상청 - 이소바르 노바",
+      "desc": "① 자신 필드에 다른 「이소바르」 몬스터가 존재할 경우, 패의 이 카드를 특수 소환할 수 있다. ② 이 카드가 엑시즈 소재로 제거되어 묘지로 보내졌을 경우, 자신의 「중앙관측소」의 기상을 다른 기상으로 변경할 수 있다. ①② 각각 1턴에 1번.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1000,
+      "def": 2000,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000205,
+      "name": "흑철기상청 - 이소바르 노바",
+      "desc": "①: 자신 필드에 「이소바르」 몬스터가 존재할 경우에 발동할 수 있다. 패에서 이 카드를 특수 소환한다. ②: 이 카드가 엑시즈 소재로서 묘지로 보내졌을 경우에 발동할 수 있다. 자신의 「흑철기상청-중앙관측소」의 기상을 다른 기상으로 변경한다. 그 후, 자신의 묘지에서 「이소바르」 몬스터 1장을 패에 넣을 수 있다. 이 카드명의 ①②의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1000,
+      "def": 2000,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_IGNITION); e1:SetRange(LOCATION_HAND); e1:SetCountLimit(1,id); e1:SetCategory(CATEGORY_SPECIAL_SUMMON); e1:SetTarget(s.sptg); e1:SetOperation(s.spop); c:RegisterEffect(e1)",
+      "local e2=Effect.CreateEffect(c); e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e2:SetProperty(EFFECT_FLAG_DELAY); e2:SetCode(EVENT_TO_GRAVE); e2:SetCountLimit(1,id+1000); e2:SetCondition(function(e) return e:GetHandler():IsPreviousLocation(LOCATION_OVERLAY) end); e2:SetTarget(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return ISOBAR.Field(tp)~=nil end end); e2:SetOperation(s.wxop); c:RegisterEffect(e2)"
+    ],
+    "review_notes": [
+      "detach weather change plus grave recovery",
+      "Lua selects any Isobar card, design says monster; optional wording not separately prompted"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000206,
+    "current_name": "흑철기상청 - 이소바르 제피르",
+    "legacy_card": {
+      "id": 210000206,
+      "name": "흑철기상청 - 이소바르 제피르",
+      "desc": "① 이 카드가 일반/특수 소환되었을 경우, 자신 묘지의 이 카드 이외의 「이소바르」 몬스터 1장을 대상으로 하고 수비 표시로 특수 소환할 수 있다. 그 몬스터의 효과는 턴 종료시까지 무효화된다. ② 이 카드가 엑시즈 소재로 제거되어 묘지로 보내졌을 경우, 자신 묘지의 다른 「이소바르」 카드 1장을 덱으로 되돌릴 수 있다. ①② 각각 1턴에 1번.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1700,
+      "def": 1500,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000206,
+      "name": "흑철기상청 - 이소바르 제피르",
+      "desc": "①: 이 카드가 일반 소환 또는 특수 소환에 성공했을 경우, 자신의 묘지의 이 카드 이외의 「이소바르」 몬스터 1장을 대상으로 발동할 수 있다. 그 몬스터를 효과를 무효로 하여 수비 표시로 특수 소환한다. ②: 이 카드가 엑시즈 소재로서 묘지로 보내졌을 경우에 발동할 수 있다. 덱에서 「이소바르」 몬스터 1장을 묘지로 보낸다. 이 카드명의 ①②의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1700,
+      "def": 1500,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e1:SetProperty(EFFECT_FLAG_DELAY); e1:SetCode(EVENT_SUMMON_SUCCESS); e1:SetCountLimit(1,id); e1:SetCategory(CATEGORY_SPECIAL_SUMMON); e1:SetTarget(s.sptg); e1:SetOperation(s.spop); c:RegisterEffect(e1); local e2=e1:Clone(); e2:SetCode(EVENT_SPSUMMON_SUCCESS); c:RegisterEffect(e2)",
+      "local e3=Effect.CreateEffect(c); e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e3:SetProperty(EFFECT_FLAG_DELAY); e3:SetCode(EVENT_TO_GRAVE); e3:SetCountLimit(1,id+1000); e3:SetCondition(function(e) return e:GetHandler():IsPreviousLocation(LOCATION_OVERLAY) end); e3:SetTarget(s.tgtg); e3:SetOperation(s.tgop); c:RegisterEffect(e3)",
+      "function s.spop(e,tp) local g=Duel.SelectMatchingCard(tp,s.filter,tp,LOCATION_GRAVE,0,1,1,nil,e,tp); if #g>0 and Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP_DEFENSE)>0 then for tc in aux.Next(g) do local a=Effect.CreateEffect(e:GetHandler()); a:SetType(EFFECT_TYPE_SINGLE); a:SetCode(EFFECT_DISABLE); a:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END); tc:RegisterEffect(a); local b=a:Clone(); b:SetCode(EFFECT_DISABLE_EFFECT); tc:RegisterEffect(b) end end end"
+    ],
+    "review_notes": [
+      "revival defense/disabled until end phase; detach recycles",
+      "design detach sends monster from deck; Lua detach sends grave Isobar to deck"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000207,
+    "current_name": "흑철기상청 - 이소바르 솔라 호크",
+    "legacy_card": {
+      "id": 210000207,
+      "name": "흑철기상청 - 이소바르 솔라 호크",
+      "desc": "레벨 4 기계족 몬스터 2장. ① 이 카드가 엑시즈 소환되었을 경우 「중앙관측소」의 기상을 「맑음」으로 변경할 수 있다. ② 이 카드의 엑시즈 소재 1개를 제거하고 덱에서 「이소바르」 몬스터 1장을 패에 넣을 수 있다. 그 후 턴 종료시까지 엑스트라 덱에서 기계족 몬스터밖에 특수 소환할 수 없다. ①② 각각 1턴에 1번.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 8388641,
+      "atk": 2400,
+      "def": 1800,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000207,
+      "name": "흑철기상청 - 이소바르 솔라 호크",
+      "desc": "레벨 4 기계족 몬스터 2장. ①: 이 카드가 엑시즈 소환에 성공했을 경우에 발동할 수 있다. 기상을 맑음으로 변경한다. ②: 자신의 메인 페이즈에 이 카드의 엑시즈 소재 1개를 제거하고 발동할 수 있다. 덱에서 「이소바르」 몬스터 1장을 패에 넣는다. 그 후, 패에서 「이소바르」 몬스터 1장을 특수 소환할 수 있다. 이 효과의 발동 후, 턴 종료시까지 자신은 기계족 몬스터밖에 엑스트라 덱에서 특수 소환할 수 없다. ③: 자신의 기상이 변경되었을 경우에 발동할 수 있다. 자신의 묘지의 「이소바르」 몬스터 1장을 이 카드의 엑시즈 소재로 한다. 이 카드명의 ①②③의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 8388641,
+      "atk": 2400,
+      "def": 1800,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "Xyz.AddProcedure(c,function(tc) return tc:IsLevel(4) and tc:IsRace(RACE_MACHINE) end,4,2); c:EnableReviveLimit()",
+      "local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e1:SetProperty(EFFECT_FLAG_DELAY); e1:SetCode(EVENT_SPSUMMON_SUCCESS); e1:SetCountLimit(1,id); e1:SetCondition(function(e) return e:GetHandler():IsSummonType(SUMMON_TYPE_XYZ) and ISOBAR.Field(e:GetHandlerPlayer())~=nil end); e1:SetTarget(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return ISOBAR.State(tp)~=ISOBAR.SUN end end); e1:SetOperation(function(e,tp) ISOBAR.Change(tp,ISOBAR.SUN,e) end); c:RegisterEffect(e1)",
+      "local e2=Effect.CreateEffect(c); e2:SetType(EFFECT_TYPE_IGNITION); e2:SetRange(LOCATION_MZONE); e2:SetCountLimit(1,id+1000); e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH+CATEGORY_SPECIAL_SUMMON); e2:SetCost(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return e:GetHandler():CheckRemoveOverlayCard(tp,1,REASON_COST) end; e:GetHandler():RemoveOverlayCard(tp,1,1,REASON_COST) end); e2:SetTarget(s.thtg); e2:SetOperation(s.thop); c:RegisterEffect(e2)",
+      "local e3=Effect.CreateEffect(c); e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O); e3:SetProperty(EFFECT_FLAG_DELAY); e3:SetCode(ISOBAR.EVENT); e3:SetRange(LOCATION_MZONE); e3:SetCountLimit(1,id+2000); e3:SetCondition(function(e) return ISOBAR.Field(e:GetHandlerPlayer())~=nil end); e3:SetTarget(s.matg); e3:SetOperation(s.matop); c:RegisterEffect(e3)"
+    ],
+    "review_notes": [
+      "summon sunny, ignition search+optional summon+machine lock, weather overlay attach"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000208,
+    "current_name": "흑철기상청 - 이소바르 스톰바스티온",
+    "legacy_card": {
+      "id": 210000208,
+      "name": "흑철기상청 - 이소바르 스톰바스티온",
+      "desc": "레벨 4 기계족 몬스터 2장. ① 이 카드가 엑시즈 소환되었을 경우 「중앙관측소」의 기상을 「강우」로 변경할 수 있다. ② 기상이 「강우」이고 상대 몬스터의 효과가 발동했을 때, 엑시즈 소재 1개를 제거하고 발동할 수 있다. 그 효과를 무효로 한다. ①② 각각 1턴에 1번.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 8388641,
+      "atk": 2500,
+      "def": 2500,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000208,
+      "name": "흑철기상청 - 이소바르 스톰바스티온",
+      "desc": "레벨 4 기계족 몬스터 2장. ①: 이 카드가 엑시즈 소환에 성공했을 경우에 발동할 수 있다. 기상을 강우로 변경한다. ②: 기상이 강우이고, 상대가 몬스터의 효과를 발동했을 때, 이 카드의 엑시즈 소재 1개를 제거하고 발동할 수 있다. 그 발동을 무효로 한다. ③: 이 카드의 ②의 효과로 상대 몬스터 효과의 발동을 무효로 했을 경우에 발동할 수 있다. 자신의 묘지의 「이소바르」 카드 1장을 덱으로 되돌린다. 이 카드명의 ①②③의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 8388641,
+      "atk": 2500,
+      "def": 2500,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "Xyz.AddProcedure(c,function(tc) return tc:IsLevel(4) and tc:IsRace(RACE_MACHINE) end,4,2); c:EnableReviveLimit()",
+      "local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e1:SetProperty(EFFECT_FLAG_DELAY); e1:SetCode(EVENT_SPSUMMON_SUCCESS); e1:SetCountLimit(1,id); e1:SetCondition(function(e) return e:GetHandler():IsSummonType(SUMMON_TYPE_XYZ) and ISOBAR.Field(e:GetHandlerPlayer())~=nil end); e1:SetTarget(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return ISOBAR.State(tp)~=ISOBAR.RAIN end end); e1:SetOperation(function(e,tp) ISOBAR.Change(tp,ISOBAR.RAIN,e) end); c:RegisterEffect(e1)",
+      "local e2=Effect.CreateEffect(c); e2:SetType(EFFECT_TYPE_QUICK_O); e2:SetCode(EVENT_CHAINING); e2:SetRange(LOCATION_MZONE); e2:SetCountLimit(1,id+1000); e2:SetCondition(function(e,tp,eg,ep,ev,re,r,rp) return rp==1-tp and ISOBAR.Is(tp,ISOBAR.RAIN) and re:IsActiveType(TYPE_MONSTER) and Duel.IsChainNegatable(ev) end); e2:SetCost(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return e:GetHandler():CheckRemoveOverlayCard(tp,1,REASON_COST) end; e:GetHandler():RemoveOverlayCard(tp,1,1,REASON_COST) end); e2:SetTarget(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return true end; Duel.SetOperationInfo(0,CATEGORY_DISABLE,eg,1,0,0) end); e2:SetOperation(function(e,tp,eg,ep,ev,re,r,rp) Duel.NegateEffect(ev); local g=Duel.SelectMatchingCard(tp,function(c) return c:IsSetCard(ISOBAR.SET) and c:IsAbleToDeck() end,tp,LOCATION_GRAVE,0,1,1,nil); if #g>0 then Duel.SendtoDeck(g,nil,SEQ_DECKSHUFFLE,REASON_EFFECT) end end); c:RegisterEffect(e2)"
+    ],
+    "review_notes": [
+      "summon rain, quick negate+recycle in same operation",
+      "design activation negate+separate trigger; Lua NegateEffect and combined recycle"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000209,
+    "current_name": "흑철기상청 - 이소바르 템페스트 제로",
+    "legacy_card": {
+      "id": 210000209,
+      "name": "흑철기상청 - 이소바르 템페스트 제로",
+      "desc": "레벨 4 기계족 몬스터 3장. ① 이 카드가 엑시즈 소환되었을 경우 「중앙관측소」의 기상을 「폭풍」으로 변경할 수 있다. ② 엑시즈 소재 1개를 제거하고 상대 필드 카드 1장을 대상으로 발동할 수 있다. 그 카드를 패로 되돌린다. ③ 이 카드가 상대 몬스터를 전투로 파괴했을 경우 턴 종료시까지 공격력을 500 올린다. ①②③ 각각 1턴에 1번.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 8388641,
+      "atk": 2800,
+      "def": 2200,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000209,
+      "name": "흑철기상청 - 이소바르 템페스트 제로",
+      "desc": "레벨 4 기계족 몬스터 2장 이상. ①: 이 카드가 엑시즈 소환에 성공했을 경우에 발동할 수 있다. 기상을 폭풍으로 변경한다. ②: 기상이 폭풍이고, 자신·상대 메인 페이즈에 이 카드의 엑시즈 소재 1개를 제거하고 발동할 수 있다. 상대 필드의 카드를 1장 고르고 주인의 패로 되돌린다. 이 효과는 대상 지정 효과가 아니다. ③: 기상이 폭풍이 아닌 경우, 자신·상대 메인 페이즈에 이 카드의 엑시즈 소재 1개를 제거하고 상대 필드의 카드 1장을 대상으로 발동할 수 있다. 그 카드를 주인의 패로 되돌린다. ④: 이 카드가 상대 몬스터를 전투로 파괴했을 경우에 발동할 수 있다. 이 카드의 공격력은 턴 종료시까지 500 올린다. 이 카드가 엑시즈 소재를 3개 이상 가지고 있을 경우, 이 카드는 이 배틀 페이즈 중 1번만 더 공격할 수 있다. 이 카드명의 ①②③④의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 8388641,
+      "atk": 2800,
+      "def": 2200,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②",
+        "효과 ③"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "Xyz.AddProcedure(c,function(tc) return tc:IsLevel(4) and tc:IsRace(RACE_MACHINE) end,4,2,nil,nil,3); c:EnableReviveLimit()",
+      "local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e1:SetProperty(EFFECT_FLAG_DELAY); e1:SetCode(EVENT_SPSUMMON_SUCCESS); e1:SetCountLimit(1,id); e1:SetCondition(function(e) return e:GetHandler():IsSummonType(SUMMON_TYPE_XYZ) and ISOBAR.Field(e:GetHandlerPlayer())~=nil end); e1:SetTarget(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return ISOBAR.State(tp)~=ISOBAR.STORM end end); e1:SetOperation(function(e,tp) ISOBAR.Change(tp,ISOBAR.STORM,e) end); c:RegisterEffect(e1)",
+      "local e2=Effect.CreateEffect(c); e2:SetType(EFFECT_TYPE_QUICK_O); e2:SetCode(EVENT_FREE_CHAIN); e2:SetRange(LOCATION_MZONE); e2:SetCountLimit(1,id+1000); e2:SetCondition(function(e,tp) return (Duel.GetCurrentPhase()==PHASE_MAIN1 or Duel.GetCurrentPhase()==PHASE_MAIN2) and ISOBAR.Is(tp,ISOBAR.STORM) end); e2:SetCost(s.cost); e2:SetTarget(s.ntg); e2:SetOperation(s.nop); c:RegisterEffect(e2)",
+      "local e3=Effect.CreateEffect(c); e3:SetType(EFFECT_TYPE_QUICK_O); e3:SetCode(EVENT_FREE_CHAIN); e3:SetRange(LOCATION_MZONE); e3:SetCountLimit(1,id+1000); e3:SetProperty(EFFECT_FLAG_CARD_TARGET); e3:SetCondition(function(e,tp) return (Duel.GetCurrentPhase()==PHASE_MAIN1 or Duel.GetCurrentPhase()==PHASE_MAIN2) and not ISOBAR.Is(tp,ISOBAR.STORM) end); e3:SetCost(s.cost); e3:SetTarget(s.tgt); e3:SetOperation(s.op); c:RegisterEffect(e3)",
+      "local e4=Effect.CreateEffect(c); e4:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e4:SetCode(EVENT_BATTLE_DESTROYING); e4:SetCountLimit(1,id+3000); e4:SetOperation(function(e) local c=e:GetHandler(); local x=Effect.CreateEffect(c); x:SetType(EFFECT_TYPE_SINGLE); x:SetCode(EFFECT_UPDATE_ATTACK); x:SetValue(500); x:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END); c:RegisterEffect(x); if c:GetOverlayCount()>=3 then local y=Effect.CreateEffect(c); y:SetType(EFFECT_TYPE_SINGLE); y:SetCode(EFFECT_EXTRA_ATTACK); y:SetValue(1); y:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END); c:RegisterEffect(y) end end); c:RegisterEffect(e4)"
+    ],
+    "review_notes": [
+      "2-to-3 material call in deployed Xyz.AddProcedure; legacy exactly3",
+      "main-phase quick storm non-target / nonstorm target; shared OPT; extra attack condition"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000210,
+    "current_name": "흑철기상청 - 중앙관측소",
+    "legacy_card": {
+      "id": 210000210,
+      "name": "흑철기상청 - 중앙관측소",
+      "desc": "발동시 기상은 「맑음」으로 한다. ① 자신 메인 페이즈에 1턴에 1번, 기상을 「맑음」「강우」「폭풍」 중 하나로 변경할 수 있다. ② 「맑음」이면 자신의 「이소바르」 몬스터 공격력 +300, 「강우」이면 상대 몬스터 공격력 -300, 「폭풍」이면 자신의 「이소바르」 몬스터가 몬스터와 전투하는 데미지 스텝 동안 상대는 마법/함정 효과를 발동할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 524290,
+      "atk": 0,
+      "def": 0,
+      "level": 0,
+      "race": 0,
+      "attribute": 0,
+      "category": 0,
+      "strings": [
+        "맑음",
+        "강우",
+        "폭풍",
+        "기상 변경"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000210,
+      "name": "흑철기상청 - 중앙관측소",
+      "desc": "이 카드의 발동시의 효과 처리로서, 덱에서 「이소바르」 몬스터 1장을 패에 넣을 수 있다. 이 카드가 발동했을 때 기상은 맑음이 된다. ①: 자신 메인 페이즈에 발동할 수 있다. 기상을 현재와 다른 기상으로 변경한다. ②: 자신 필드에 「이소바르」 엑시즈 몬스터가 존재하고 기상이 변경되었을 경우에 발동할 수 있다. 덱에서 「이소바르의 긴급경보」 1장을 자신 필드에 세트한다. ③: 기상에 따라 이하의 효과를 적용한다. 맑음: 자신 필드의 「이소바르」 몬스터의 공격력은 300 올린다. 강우: 상대 필드의 몬스터의 공격력은 300 내린다. 폭풍: 자신 필드의 「이소바르」 몬스터가 몬스터와 전투하는 데미지 스텝 중, 상대는 마법·함정 카드의 효과를 발동할 수 없다. 이 카드명의 카드의 발동은 1턴에 1번밖에 할 수 없으며, ①②의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 524290,
+      "atk": 0,
+      "def": 0,
+      "level": 0,
+      "race": 0,
+      "attribute": 0,
+      "category": 0,
+      "strings": [
+        "맑음",
+        "강우",
+        "폭풍",
+        "기상 변경"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_ACTIVATE); e1:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH); e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH); e1:SetOperation(s.activate); c:RegisterEffect(e1)",
+      "local e2=Effect.CreateEffect(c); e2:SetType(EFFECT_TYPE_IGNITION); e2:SetRange(LOCATION_FZONE); e2:SetCountLimit(1,id); e2:SetTarget(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return ISOBAR.State(tp)>0 end end); e2:SetOperation(function(e,tp) ISOBAR.Change(tp,ISOBAR.Choose(tp,ISOBAR.State(tp)),e) end); c:RegisterEffect(e2)",
+      "local e3=Effect.CreateEffect(c); e3:SetType(EFFECT_TYPE_FIELD); e3:SetCode(EFFECT_UPDATE_ATTACK); e3:SetRange(LOCATION_FZONE); e3:SetTargetRange(LOCATION_MZONE,0); e3:SetCondition(function(e) return ISOBAR.Is(e:GetHandlerPlayer(),ISOBAR.SUN) end); e3:SetTarget(function(e,c) return ISOBAR.Monster(c) end); e3:SetValue(300); c:RegisterEffect(e3)",
+      "local e5=Effect.CreateEffect(c); e5:SetType(EFFECT_TYPE_FIELD); e5:SetRange(LOCATION_FZONE); e5:SetCode(EFFECT_CANNOT_ACTIVATE); e5:SetProperty(EFFECT_FLAG_PLAYER_TARGET); e5:SetTargetRange(0,1); e5:SetCondition(function(e) return ISOBAR.Is(e:GetHandlerPlayer(),ISOBAR.STORM) end); e5:SetValue(s.block); c:RegisterEffect(e5)",
+      "local e6=Effect.CreateEffect(c); e6:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O); e6:SetCode(ISOBAR.EVENT); e6:SetRange(LOCATION_FZONE); e6:SetCountLimit(1,id+1000); e6:SetCondition(function(e,tp) return Duel.IsExistingMatchingCard(ISOBAR.Xyz,tp,LOCATION_MZONE,0,1,nil) end); e6:SetTarget(s.settg); e6:SetOperation(s.setop); c:RegisterEffect(e6)"
+    ],
+    "review_notes": [
+      "activation monster search+sun; weather event alert set; legacy activation no search"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000211,
+    "current_name": "이소바르의 기압전선",
+    "legacy_card": {
+      "id": 210000211,
+      "name": "이소바르의 기압전선",
+      "desc": "자신 필드에 「이소바르」 몬스터가 존재할 경우 발동할 수 있다. 자신의 「중앙관측소」의 기상을 다른 기상으로 변경한다. 그 후 자신 필드 몬스터 1장의 공격력 또는 수비력을 턴 종료시까지 500 올린다. 이 카드명의 카드는 1턴에 1장밖에 발동할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 65538,
+      "atk": 0,
+      "def": 0,
+      "level": 0,
+      "race": 0,
+      "attribute": 0,
+      "category": 0,
+      "strings": [
+        "기압전선 발동",
+        "공격력 500 상승",
+        "수비력 500 상승"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000211,
+      "name": "이소바르의 기압전선",
+      "desc": "자신 필드에 「이소바르」 몬스터가 존재하는 경우에 발동할 수 있다. 기상을 현재와 다른 기상으로 변경한다. 그 후, 변경한 기상에 따라 이하의 효과를 적용할 수 있다. 맑음: 자신의 묘지의 「이소바르」 몬스터 1장을 패에 넣는다. 강우: 자신 필드의 「이소바르」 몬스터 1장은 턴 종료시까지 상대 효과로는 파괴되지 않는다. 폭풍: 상대 필드의 앞면 표시 몬스터 1장의 공격력을 턴 종료시까지 1000 내린다. 이 카드명의 카드는 1턴에 1장밖에 발동할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 65538,
+      "atk": 0,
+      "def": 0,
+      "level": 0,
+      "race": 0,
+      "attribute": 0,
+      "category": 0,
+      "strings": [
+        "기압전선 발동",
+        "공격력 500 상승",
+        "수비력 500 상승"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "local e=Effect.CreateEffect(c); e:SetType(EFFECT_TYPE_ACTIVATE); e:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH); e:SetTarget(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return ISOBAR.Field(tp)~=nil and Duel.IsExistingMatchingCard(ISOBAR.Monster,tp,LOCATION_MZONE,0,1,nil) end end); e:SetOperation(s.op); c:RegisterEffect(e)",
+      "function s.op(e,tp) local old=ISOBAR.State(tp); if old==0 then return end; local state=ISOBAR.Choose(tp,old); if not ISOBAR.Change(tp,state,e) then return end; if state==ISOBAR.SUN then local g=Duel.SelectMatchingCard(tp,function(c) return c:IsSetCard(ISOBAR.SET) and c:IsAbleToHand() end,tp,LOCATION_GRAVE,0,1,1,nil); if #g>0 then Duel.SendtoHand(g,nil,REASON_EFFECT) end elseif state==ISOBAR.RAIN then local g=Duel.GetMatchingGroup(ISOBAR.Monster,tp,LOCATION_MZONE,0,nil); if #g>0 then local x=g:Select(tp,1,1,nil):GetFirst(); local a=Effect.CreateEffect(e:GetHandler()); a:SetType(EFFECT_TYPE_SINGLE); a:SetCode(EFFECT_INDESTRUCTIBLE_EFFECT); a:SetValue(1); a:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END); x:RegisterEffect(a) end else local g=Duel.GetMatchingGroup(function(c) return c:IsFaceup() and c:IsAttackAbove(1) end,tp,0,LOCATION_MZONE,nil); if #g>0 then local x=g:Select(tp,1,1,nil):GetFirst(); local a=Effect.CreateEffect(e:GetHandler()); a:SetType(EFFECT_TYPE_SINGLE); a:SetCode(EFFECT_UPDATE_ATTACK); a:SetValue(-1000); a:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END); x:RegisterEffect(a) end end end"
+    ],
+    "review_notes": [
+      "weather-conditional recovery/protection/ATK decrease replaces legacy +500",
+      "rain script grants effect destruction protection without checking controller; sun can recover Isobar spell/trap too"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000212,
+    "current_name": "이소바르의 관측일지",
+    "legacy_card": {
+      "id": 210000212,
+      "name": "이소바르의 관측일지",
+      "desc": "덱에서 「이소바르」 몬스터 1장을 패에 넣는다. 그 후 자신의 패에서 「이소바르」 카드 1장을 묘지로 보낼 수 있다. 이 카드명의 카드는 1턴에 1장밖에 발동할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 2,
+      "atk": 0,
+      "def": 0,
+      "level": 0,
+      "race": 0,
+      "attribute": 0,
+      "category": 0,
+      "strings": [
+        "이소바르 몬스터 서치",
+        "서치 후 이소바르 카드를 묘지로 보냅니까?"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000212,
+      "name": "이소바르의 관측일지",
+      "desc": "①: 덱에서 「이소바르」 몬스터 1장을 패에 넣는다. 그 후, 패에서 「이소바르」 카드 1장을 묘지로 보낼 수 있다. 이 효과로 카드를 묘지로 보냈을 경우, 자신의 묘지의 「이소바르」 몬스터 1장을 효과를 무효로 하여 특수 소환할 수 있다. 이 효과로 특수 소환한 몬스터는 필드에서 벗어났을 경우에 제외된다. 이 카드명의 카드는 1턴에 1장밖에 발동할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 2,
+      "atk": 0,
+      "def": 0,
+      "level": 0,
+      "race": 0,
+      "attribute": 0,
+      "category": 0,
+      "strings": [
+        "이소바르 몬스터 서치",
+        "서치 후 이소바르 카드를 묘지로 보냅니까?"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "e:SetType(EFFECT_TYPE_ACTIVATE)",
+      "e:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)",
+      "d:SetType(EFFECT_TYPE_SINGLE)",
+      "d:SetCode(EFFECT_DISABLE)",
+      "d2:SetCode(EFFECT_DISABLE_EFFECT)",
+      "d3:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)"
+    ],
+    "review_notes": [
+      "search+optional hand send+disabled revival+leave-field banish replaces search/send only"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000213,
+    "current_name": "이소바르의 긴급경보",
+    "legacy_card": {
+      "id": 210000213,
+      "name": "이소바르의 긴급경보",
+      "desc": "자신 필드에 「이소바르」 엑시즈 몬스터가 존재할 경우, 상대 필드의 앞면 카드 1장을 대상으로 발동할 수 있다. 그 효과를 턴 종료시까지 무효로 한다. 기상이 「폭풍」이고 대상이 몬스터라면 그 공격력을 0으로 할 수 있다. 이 카드명의 카드는 1턴에 1장밖에 발동할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 4,
+      "atk": 0,
+      "def": 0,
+      "level": 0,
+      "race": 0,
+      "attribute": 0,
+      "category": 0,
+      "strings": [
+        "긴급경보",
+        "대상 몬스터의 공격력을 0으로 만듭니까?"
+      ]
+    },
+    "runtime_card": {
+      "id": 210000213,
+      "name": "이소바르의 긴급경보",
+      "desc": "자신 필드에 「이소바르」 엑시즈 몬스터가 존재하는 경우에 발동할 수 있다. 상대 필드의 앞면 표시 카드 1장을 대상으로 발동한다. 그 카드의 효과를 턴 종료시까지 무효로 한다. 기상이 폭풍인 경우, 대상이 몬스터라면 추가로 그 몬스터의 공격력을 0으로 할 수 있다. 이 카드명의 카드는 1턴에 1장밖에 발동할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 4,
+      "atk": 0,
+      "def": 0,
+      "level": 0,
+      "race": 0,
+      "attribute": 0,
+      "category": 0,
+      "strings": [
+        "긴급경보",
+        "대상 몬스터의 공격력을 0으로 만듭니까?"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "local e=Effect.CreateEffect(c); e:SetType(EFFECT_TYPE_ACTIVATE); e:SetProperty(EFFECT_FLAG_CARD_TARGET); e:SetCode(EVENT_FREE_CHAIN); e:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH); e:SetTarget(s.tg); e:SetOperation(s.op); c:RegisterEffect(e)",
+      "function s.op(e,tp) local c=Duel.GetFirstTarget(); if not c or not c:IsRelateToEffect(e) then return end; local a=Effect.CreateEffect(e:GetHandler()); a:SetType(EFFECT_TYPE_SINGLE); a:SetCode(EFFECT_DISABLE); a:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END); c:RegisterEffect(a); local b=a:Clone(); b:SetCode(EFFECT_DISABLE_EFFECT); c:RegisterEffect(b); if c:IsMonster() and ISOBAR.Is(tp,ISOBAR.STORM) and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then local d=a:Clone(); d:SetCode(EFFECT_SET_ATTACK_FINAL); d:SetValue(0); c:RegisterEffect(d) end end"
+    ],
+    "review_notes": [
+      "target negate and optional storm ATK0; broadly retained"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000214,
+    "current_name": "흑철기상청 - 이소바르 시러스",
+    "legacy_card": null,
+    "runtime_card": {
+      "id": 210000214,
+      "name": "흑철기상청 - 이소바르 시러스",
+      "desc": "①: 자신 필드에 몬스터가 존재하지 않거나, 자신 필드에 「흑철기상청-중앙관측소」가 존재할 경우에 발동할 수 있다. 패에서 이 카드를 특수 소환한다. ②: 이 카드가 일반 소환 또는 특수 소환에 성공했을 경우에 발동할 수 있다. 덱에서 「흑철기상청-중앙관측소」 1장을 패에 넣는다. 자신 필드에 그 카드가 존재할 경우, 대신 덱에서 이 카드 이외의 「이소바르」 몬스터 1장을 패에 넣을 수 있다. 이 카드명의 ①②의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1500,
+      "def": 1000,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_IGNITION); e1:SetRange(LOCATION_HAND); e1:SetCountLimit(1,id); e1:SetTarget(function(e,tp,eg,ep,ev,re,r,rp,chk) if chk==0 then return (Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)==0 or ISOBAR.Field(tp)~=nil) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end end); e1:SetOperation(function(e,tp) Duel.SpecialSummon(e:GetHandler(),0,tp,tp,false,false,POS_FACEUP) end); c:RegisterEffect(e1)",
+      "local e2=Effect.CreateEffect(c); e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e2:SetProperty(EFFECT_FLAG_DELAY); e2:SetCode(EVENT_SUMMON_SUCCESS); e2:SetCountLimit(1,id+1000); e2:SetTarget(s.tg); e2:SetOperation(s.op); c:RegisterEffect(e2); local e3=e2:Clone(); e3:SetCode(EVENT_SPSUMMON_SUCCESS); c:RegisterEffect(e3)"
+    ],
+    "review_notes": [
+      "missing in legacy CDB/Lua; empty-field/field hand summon+search",
+      "Lua target permits monster availability without observatory but operation selects observatory when field absent"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000215,
+    "current_name": "흑철기상청 - 이소바르 님버스",
+    "legacy_card": null,
+    "runtime_card": {
+      "id": 210000215,
+      "name": "흑철기상청 - 이소바르 님버스",
+      "desc": "①: 자신의 「흑철기상청-중앙관측소」의 기상이 변경되었을 경우에 발동할 수 있다. 패 또는 묘지에서 이 카드를 특수 소환한다. 묘지에서 특수 소환한 이 카드는 필드에서 벗어났을 경우에 제외된다. ②: 이 카드가 「이소바르」 엑시즈 몬스터의 엑시즈 소재가 되어 있는 한, 그 엑시즈 몬스터는 이하의 효과를 얻는다. ● 이 카드가 엑시즈 소환된 턴에 1번, 상대가 몬스터의 효과를 발동했을 때, 이 카드의 엑시즈 소재 1개를 제거하고 발동할 수 있다. 그 발동을 무효로 한다. 이 카드명의 ①의 효과는 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 33,
+      "atk": 1900,
+      "def": 1400,
+      "level": 4,
+      "race": 32,
+      "attribute": 8,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "local e1=Effect.CreateEffect(c); e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O); e1:SetProperty(EFFECT_FLAG_DELAY); e1:SetCode(ISOBAR.EVENT); e1:SetRange(LOCATION_HAND+LOCATION_GRAVE); e1:SetCountLimit(1,id); e1:SetCondition(function(e,tp) return ISOBAR.Field(tp)~=nil end); e1:SetTarget(s.sptg); e1:SetOperation(s.spop); c:RegisterEffect(e1)",
+      "local e2=Effect.CreateEffect(c); e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O); e2:SetProperty(EFFECT_FLAG_DELAY); e2:SetCode(EVENT_BE_MATERIAL); e2:SetCountLimit(1,id+1000); e2:SetCondition(function(e,tp,eg,ep,ev,re,r,rp) return r&REASON_XYZ~=0 end); e2:SetOperation(s.gain); c:RegisterEffect(e2)",
+      "function s.spop(e,tp) local c=e:GetHandler(); local fromgrave=c:IsLocation(LOCATION_GRAVE); if Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 and fromgrave then local a=Effect.CreateEffect(c); a:SetType(EFFECT_TYPE_SINGLE); a:SetCode(EFFECT_LEAVE_FIELD_REDIRECT); a:SetProperty(EFFECT_FLAG_CANNOT_DISABLE); a:SetReset(RESET_EVENT+RESETS_REDIRECT); a:SetValue(LOCATION_REMOVED); c:RegisterEffect(a,true) end end",
+      "local x=Effect.CreateEffect(rc); x:SetDescription(aux.Stringid(id,1)); x:SetCategory(CATEGORY_NEGATE); x:SetType(EFFECT_TYPE_QUICK_O); x:SetCode(EVENT_CHAINING); x:SetRange(LOCATION_MZONE); x:SetCountLimit(1,id+2000); x:SetCondition(function(xe,xt,eg2,ep2,ev2,re2,r2,rp2) return rp2==1-xt and re2:IsActiveType(TYPE_MONSTER) and Duel.IsChainNegatable(ev2) and xe:GetHandler():GetOverlayGroup():IsContains(e:GetHandler()) end); x:SetCost(function(xe,xt,eg2,ep2,ev2,re2,r2,rp2,chk) if chk==0 then return xe:GetHandler():CheckRemoveOverlayCard(xt,1,REASON_COST) end; xe:GetHandler():RemoveOverlayCard(xt,1,1,REASON_COST) end); x:SetTarget(function(xe,xt,eg2,ep2,ev2,re2,r2,rp2,chk) if chk==0 then return true end; Duel.SetOperationInfo(0,CATEGORY_NEGATE,eg2,1,0,0) end); x:SetOperation(function(xe,xt,eg2,ep2,ev2,re2,r2,rp2) Duel.NegateEffect(ev2) end); x:SetReset(RESET_EVENT+RESETS_STANDARD); rc:RegisterEffect(x)"
+    ],
+    "review_notes": [
+      "missing in legacy CDB/Lua; weather hand/grave summon+granted effect",
+      "design granted negate only summon turn; Lua no summon-turn condition; NegateEffect vs activation-negation wording"
+    ],
+    "semantic_runtime_validation": "not_run"
+  },
+  {
+    "id": 210000216,
+    "current_name": "이소바르의 폭풍경계",
+    "legacy_card": null,
+    "runtime_card": {
+      "id": 210000216,
+      "name": "이소바르의 폭풍경계",
+      "desc": "기상이 폭풍이 아니고, 자신 필드에 「이소바르」 몬스터가 존재하는 경우에 발동할 수 있다. ①: 기상을 폭풍으로 변경한다. 그 후, 상대 필드의 마법·함정 카드 1장을 대상으로 발동할 수 있다. 그 카드를 주인의 패로 되돌린다. ②: 묘지의 이 카드를 제외하고, 자신의 묘지의 「이소바르」 몬스터 1장을 대상으로 발동할 수 있다. 그 몬스터를 덱으로 되돌리고 자신은 1장 드로우한다. 이 효과는 이 카드가 묘지로 보내진 턴에는 발동할 수 없다. 이 카드명의 ①②의 효과는 각각 1턴에 1번밖에 사용할 수 없다.",
+      "ot": 8,
+      "alias": 0,
+      "setcode": 7665,
+      "type": 65538,
+      "atk": 0,
+      "def": 0,
+      "level": 0,
+      "race": 0,
+      "attribute": 0,
+      "category": 0,
+      "strings": [
+        "효과 ①",
+        "효과 ②"
+      ]
+    },
+    "executor_id_present": true,
+    "policy_id_present": true,
+    "script_registration_lines": [
+      "e1:SetType(EFFECT_TYPE_ACTIVATE)",
+      "e1:SetCode(EVENT_FREE_CHAIN)",
+      "e1:SetCountLimit(1,id)",
+      "e2:SetType(EFFECT_TYPE_IGNITION)",
+      "e2:SetRange(LOCATION_GRAVE)",
+      "e2:SetCountLimit(1,id+1000)",
+      "e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)",
+      "e3:SetCode(EVENT_TO_GRAVE)"
+    ],
+    "review_notes": [
+      "missing in legacy CDB/Lua; storm target bounce and delayed grave recycle/draw",
+      "activation requires a target up front, unlike optional wording; grave flag has trigger timing questions"
+    ],
+    "semantic_runtime_validation": "not_run"
+  }
+]

@@ -1,0 +1,46 @@
+{
+  "baseline_id": "isobar-v2.0.2-49a0643",
+  "source_commit": "49a0643ca322cc6ea393631c59190c20a0e82a28",
+  "source_repository": "https://github.com/bduidohd937-beep/ygocustome",
+  "selection": "Deployed V2.0.2: individual scripts match raw bytes; helper matches after CRLF/LF normalization; all CDB columns match. Snapshot uses Git blob bytes, without rule edits.",
+  "semantic_equivalence_to_design_certified": false,
+  "unresolved_text_implementation_differences": [
+    210000201,
+    210000204,
+    210000205,
+    210000206,
+    210000208,
+    210000211,
+    210000214,
+    210000215,
+    210000216
+  ],
+  "missing_in_legacy": [
+    210000214,
+    210000215,
+    210000216
+  ],
+  "files": {
+    "cards.json": "138dca6f050cec215ed5e3b9ce169a11852ee631793c14363b827050f42fac62",
+    "comparison.json": "916c69daf11717b7f112d9d5546664fdabf87845081dfd8e14a2c851a0f9b8d1",
+    "script/c210000201.lua": "14428544874aa4892feee350b5f3503fd322a7d2a75223da94a160d9f6ea1e87",
+    "script/c210000202.lua": "a9b595b6155f82dcf4bbfa486be3e280ee59fb8c06017ca5a7e24f9340a11d5e",
+    "script/c210000203.lua": "664e43753110698a85dc782ad0305019885992e6afc50c2eb26cf20878f84ced",
+    "script/c210000204.lua": "9b7ea0f40cca15546d570d4d11480e5e650545b6b1b140eae005499b576777f2",
+    "script/c210000205.lua": "69d18debc7c9244b760a42915e7274108cd0420820a7a1584fbcb67e5bedf211",
+    "script/c210000206.lua": "ec28d9078fb2b17d932e3f6d95524f40c2f6381ff58a50d89e33040e83a65676",
+    "script/c210000207.lua": "132dfd750bf4cd39db76d01047eab68a692d991e71e4efbf6a77ad7109cfcdd2",
+    "script/c210000208.lua": "342edc8386b8713f39ebdbcdb39fd553e9af8e6150b59c26a108f10f5b7825cd",
+    "script/c210000209.lua": "42b24b5ae139d76925185535bec47524492d6d9ec2f5169f94203e32cbb98ecf",
+    "script/c210000210.lua": "e3934c32818f4ded913e0b2c81c1cf6839b8ff490616f6569e7944cb56a2b767",
+    "script/c210000211.lua": "3d2d7f8a461ef8fed036bbc52fee0d9386d37a626f7c2a1a7452b427806e3951",
+    "script/c210000212.lua": "ba28e96c6e1f89980898d4a190d0fb8439409a77bfbb6c042c5b03be0784be0a",
+    "script/c210000213.lua": "5bb9a901a465b59567997e8937eb5fcebc43607d6d3c4ee84e9d36d01b36f445",
+    "script/c210000214.lua": "575b9f0d8970092168e8bbaebc94f2faaf3e433a8e016357b385f1c97f362654",
+    "script/c210000215.lua": "f2b76357824c2f0d1ab45534277b71750e53903441f14bccf68aaeb02f628292",
+    "script/c210000216.lua": "dd221c2bc0942a828941c3ceed0ef3edea885de1db496301e2f87444ffdf1b9f",
+    "script/isobar.lua": "9668c444ea9a05921899aefa4891754628b8983fea9d1472043a148e33717821",
+    "SOURCE_DESIGN.txt": "0cd60c35c84040c3ca15476bf4321df5df8878a172d9410acc571fe96531ee24"
+  },
+  "asset_digest": "ed55edf212c155cbd00cbff5d4d5516f418b1f48143261b96cf1ab56078cc1bd"
+}

@@ -16,10 +16,12 @@ try:
     from duelmind.core.universal import decide_unsupported
     from duelmind.profiles.registry import get_profile, profile_id_from_observation
     from duelmind.profiles.oceantale import decide_ocean_tale
+    from duelmind.core.knowledge import runtime_observation, annotate_runtime
 except ImportError:  # Direct script execution keeps the V2.2 server compatible.
     from core.universal import decide_unsupported
     from profiles.registry import get_profile, profile_id_from_observation
     from profiles.oceantale import decide_ocean_tale
+    from core.knowledge import runtime_observation, annotate_runtime
 
 
 def _dispatch(obs: dict, config: dict[str, float] | None = None) -> dict:
@@ -39,7 +41,10 @@ def _dispatch(obs: dict, config: dict[str, float] | None = None) -> dict:
 
     profile = get_profile(profile_id)
     if profile.profile_id == "isobar":
-        result = _decide_isobar(obs, config)
+        if obs.get("card_baseline"):
+            result = annotate_runtime(_decide_isobar(runtime_observation(obs), config), obs)
+        else:
+            result = _decide_isobar(obs, config)
         result["profile_id"] = "isobar"
         result["profile_status"] = "supported"
         return result
